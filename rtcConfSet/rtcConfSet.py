@@ -270,6 +270,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         rtsp.data_port_connectors = data_connectors
         rtsp.service_port_connectors = svc_connectors
 
+        
+
         if dest == '-':
             
             if xml:
@@ -284,6 +286,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             else:
                 f.write(rtsp.save_to_yaml())
             f.close()
+            
 
     def getConnectRTCs(self, comp, clist):
         for l in clist:
@@ -475,7 +478,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         dirname_py = os.path.relpath(dirname[3]).replace("\\","/")
 
         
-        sysFileName = os.path.relpath(sysFileName,dirname[0])
+        
 
         
 
@@ -520,7 +523,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
             
         
-        
+            sysFileName = os.path.relpath(sysFileName,dirname[0])
             self.saveBatFile(dirname[0],dirname_cpp,dirname_py,sysFileName,clist)
         
         
