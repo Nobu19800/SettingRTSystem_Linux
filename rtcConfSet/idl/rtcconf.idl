@@ -1,0 +1,45 @@
+#ifndef RTCCONF_IDL
+#define RTCCONF_IDL
+#include "BasicDataType.idl"
+
+
+
+
+module RTCConfData {
+
+	struct confData {
+		string id;
+		string data;
+	};
+
+	typedef sequence<confData> confDataSeq;
+	typedef sequence<string> stringSeq;
+
+	interface ConfDataInterface {
+		boolean open(in string filename);
+		boolean save(in string filename);
+		boolean setConfData_Cpp(in string filename, out confDataSeq data);
+		boolean setConfData_Py(in string filename, out confDataSeq data);
+		boolean setData_Cpp(in confData data);
+		boolean getData_Cpp(in string name, out confData data);
+		boolean setDataSeq_Cpp(in confDataSeq data);
+		boolean getDataSeq_Cpp(out confDataSeq data);
+		boolean setData_Py(in confData data);
+		boolean getData_Py(in string name, out confData data);
+		boolean setDataSeq_Py(in confDataSeq data);
+		boolean getDataSeq_Py(out confDataSeq data);
+		boolean addModule_Cpp(in string filepath);
+		boolean addModule_Py(in string filepath);
+		boolean startRTCD_Cpp();
+		boolean startRTCD_Py();
+		boolean exitRTCD_Cpp();
+		boolean exitRTCD_Py();
+		string getRelPath(in string filepath);
+		boolean setSystem();
+		boolean setExRTCList(in stringSeq name);
+		boolean getExRTCList(out stringSeq name);
+	};
+
+};
+
+#endif // RTCCONF_IDL

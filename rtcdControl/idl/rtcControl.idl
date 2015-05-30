@@ -1,0 +1,20 @@
+#ifndef RTCCONF_IDL
+#define RTCCONF_IDL
+#include "BasicDataType.idl"
+
+
+
+
+module rtcControl {
+
+	typedef sequence<string> rtcPathSeq;
+
+	interface RTCDataInterface {
+		boolean getRTC(out rtcPathSeq paths);
+		boolean createComp(in string filename, in string filepath);
+		boolean removeComp(in string name);
+	};
+
+};
+
+#endif // RTCCONF_IDL
