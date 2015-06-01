@@ -16,7 +16,7 @@ project(MultipleOrderedEC)
 set(CMAKE_AUTOMOC ON)
 
 
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Widgets)
 
 find_package(OpenRTM REQUIRED)
 
