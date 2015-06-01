@@ -1,3 +1,6 @@
 [submodule "ExecutionContext/MultipleOrderedEC-C++"]
 	path = ExecutionContext/MultipleOrderedEC-C++
 	url = https://github.com/Nobu19800/MultipleOrderedEC-GUI.git
+[submodule "ExecutionContext/MultipleOrderedEC-Python"]
+	path = ExecutionContext/MultipleOrderedEC-Python
+	url = https://github.com/Nobu19800/MultipleOrderedEC-Python-GUI.git
