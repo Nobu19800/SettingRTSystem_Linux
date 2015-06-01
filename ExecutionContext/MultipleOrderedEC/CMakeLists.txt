@@ -1,10 +1,13 @@
 cmake_minimum_required (VERSION 2.6)
 
 
-set(BOOST_PATH "C:/boost_1_52_0")
-set(LUABIND_PATH "luabind-0.9.1")
-set(LUA_PATH "C:/Program Files (x86)/Lua/5.1")
 
+#if(WIN32)
+#	set(BOOST_PATH "C:/boost_1_52_0")
+#	set(LUA_PATH "C:/Program Files (x86)/Lua/5.1")
+#endif(WIN32)
+
+set(LUABIND_PATH "luabind-0.9.1")
 
 project(MultipleOrderedEC)
 
@@ -17,12 +20,30 @@ find_package(Qt5Widgets REQUIRED)
 
 find_package(OpenRTM REQUIRED)
 
+
+#if(WIN32)
+
+#  set(BOOST_ROOT $ENV{BOOST_ROOT})
+
+#endif()
+
+find_package(Boost REQUIRED)
+
+find_package(Lua51 REQUIRED)
+
 include_directories(${OPENRTM_INCLUDE_DIRS})
 include_directories(${OMNIORB_INCLUDE_DIRS})
 
-include_directories(${BOOST_PATH})
+#if(WIN32)
+#	include_directories(${BOOST_PATH})
+#	include_directories(${LUA_PATH}/include)
+#endif(WIN32)
+
+
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${LUA_INCLUDE_DIR})
+
 include_directories(${LUABIND_PATH})
-include_directories(${LUA_PATH}/include)
 
 
 add_definitions(${OPENRTM_CFLAGS})
@@ -33,8 +54,13 @@ add_definitions(-D_NOMINMAX)
 link_directories(${OPENRTM_LIBRARY_DIRS})
 link_directories(${OMNIORB_LIBRARY_DIRS})
 
-link_directories(${LUA_PATH}/lib)
-link_directories(${BOOST_PATH}/libs)
+#if(WIN32)
+#	link_directories(${LUA_PATH}/lib)
+#	link_directories(${BOOST_PATH}/libs)
+#endif(WIN32)
+
+
+
 
 
 set(luabind_srcs ${LUABIND_PATH}/src/class.cpp ${LUABIND_PATH}/src/class_info.cpp ${LUABIND_PATH}/src/class_registry.cpp ${LUABIND_PATH}/src/class_rep.cpp ${LUABIND_PATH}/src/create_class.cpp ${LUABIND_PATH}/src/error.cpp ${LUABIND_PATH}/src/exception_handler.cpp ${LUABIND_PATH}/src/function.cpp ${LUABIND_PATH}/src/inheritance.cpp ${LUABIND_PATH}/src/link_compatibility.cpp ${LUABIND_PATH}/src/object_rep.cpp ${LUABIND_PATH}/src/open.cpp ${LUABIND_PATH}/src/pcall.cpp ${LUABIND_PATH}/src/scope.cpp ${LUABIND_PATH}/src/stack_content_by_name.cpp ${LUABIND_PATH}/src/weak_ref.cpp ${LUABIND_PATH}/src/wrapper_base.cpp )
@@ -58,18 +84,23 @@ IF (${Qt5Widgets_FOUND})
 
 
 	ADD_LIBRARY(MultipleOrderedEC SHARED  ${ec_srcs} ${luabind_srcs} ${QRC})
-	target_link_libraries(MultipleOrderedEC ${OPENRTM_LIBRARIES} lua5.1.lib lua51.lib)
-	target_link_libraries(MultipleOrderedEC ${OPENRTM_LIBRARIES} liblua5.1.so)
+	
 	QT5_USE_MODULES(MultipleOrderedEC Widgets)
 ELSE (${Qt5Widgets_FOUND})
 	set(ec_srcs CompSearch.cpp MPComp.cpp MPLua.cpp MPTask.cpp MultipleOrderedEC.cpp )
 	ADD_LIBRARY(MultipleOrderedEC SHARED  ${ec_srcs} ${luabind_srcs})
-	target_link_libraries(MultipleOrderedEC ${OPENRTM_LIBRARIES} lua5.1.lib lua51.lib)
-	#target_link_libraries(MultipleOrderedEC ${OPENRTM_LIBRARIES} liblua5.1.so)
+	
 ENDIF (${Qt5Widgets_FOUND})
 
 
 
+#if(WIN32)
+#	target_link_libraries(MultipleOrderedEC ${OPENRTM_LIBRARIES} lua5.1.lib lua51.lib)
+#elseif(UNIX)
+#	target_link_libraries(MultipleOrderedEC ${OPENRTM_LIBRARIES} liblua5.1.so)
+#endif(WIN32)
+
+target_link_libraries(MultipleOrderedEC ${OPENRTM_LIBRARIES} ${LUA_LIBRARIES})
 
 
 
