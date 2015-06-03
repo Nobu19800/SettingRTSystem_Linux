@@ -63,9 +63,12 @@ def connectServicePort(obj1, obj2, c_name):
 
     # connect ports
     conprof = RTC.ConnectorProfile(c_name, "", [obj1,obj2], [])
+
     
 
     ret = obj2.connect(conprof)
+
+    
 
 
 
@@ -169,6 +172,13 @@ class MainWindow(QtGui.QMainWindow):
         self.saveAsAct.setShortcuts(QtGui.QKeySequence.SaveAs)
         self.saveAsAct.triggered.connect(self.saveAs)
 
+    def deleteTabs(self):
+        if self.tab_widget_cpp:
+            self.tab_widget.removeTab(self.tab_widget.indexOf(self.tab_widget_cpp))
+            self.tab_widget_cpp = None
+        if self.tab_widget_python:
+            self.tab_widget.removeTab(self.tab_widget.indexOf(self.tab_widget_python))
+            self.tab_widget_python = None
     ##
     #メニューの作成の関数
     ##
@@ -192,6 +202,8 @@ class MainWindow(QtGui.QMainWindow):
         
         connectServicePort(confsetPort.object, self.control_comp._rtcconfPort.getPortRef(), portname)
 
+        
+
         self.control_comp.get_owned_contexts()[0].activate_component(self.control_comp.getObjRef())
 
 
@@ -201,6 +213,7 @@ class MainWindow(QtGui.QMainWindow):
         flag = True
 
         while flag:
+            
             try:
                 self.control_comp._rtcconf._ptr().open(filapath)
                 wid = self.rtcd_widget.WidList["rtcList"]["Widget"]
@@ -218,12 +231,19 @@ class MainWindow(QtGui.QMainWindow):
 
         self.mgrc_cpp.SetParam()
         self.mgrc_py.SetParam()
+
+
+        self.deleteTabs()
+
+        if self.tab_widget_cpp == None:
+            self.tab_widget_cpp = TabWidget(self.mgrc_cpp,"C++")
+            self.tab_widget.addTab(self.tab_widget_cpp, u"CPP")
+
+        if self.tab_widget_python == None:
+            self.tab_widget_python = TabWidget(self.mgrc_py,"Python")
+            self.tab_widget.addTab(self.tab_widget_python, u"Python")
         
-        self.tab_widget_cpp = TabWidget(self.mgrc_cpp,"C++")
-        self.tab_widget_python = TabWidget(self.mgrc_py,"Python")
         
-        self.tab_widget.addTab(self.tab_widget_cpp, u"CPP")
-        self.tab_widget.addTab(self.tab_widget_python, u"Python")
 
     def getFunc(self, filename, filepath):
         try:
