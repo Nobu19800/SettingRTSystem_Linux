@@ -36,6 +36,8 @@ from MTabWidget import MTabWidget
 from ManagerControl import ManagerControl
 
 
+
+
 class ManagerWidget(MTabWidget):
     
     def __init__(self, mgrc, language="Python",  parent=None):
@@ -119,6 +121,17 @@ class ManagerWidget(MTabWidget):
         wid = self.WidList["manager.modules.load_path"]["Widget"]
         wid.removeItem(wid.findText(wid.currentText()))
 
+
+
+    def judgePath(self, path, opath):
+        pathList = path.split("/")
+        if len(pathList) < len(opath):
+            return False
+        for i in range(0,len(opath)):
+            if opath[i] != pathList[i]:
+                return False
+        return True
+
     def loadRTC(self, fileName):
         fname = os.path.basename(fileName)
         name, ext = os.path.splitext(fname)
@@ -131,7 +144,17 @@ class ManagerWidget(MTabWidget):
             self.mesBox(u"モジュールの読み込みに失敗しました")
             return
 
-        if tmp_dname == "/usr/local/components/lib":
+        if tmp_dname == "/usr/local/components/lib" or tmp_dname == "C:/OpenRTM-aist/components/bin":
+            dname = [tmp_dname]
+
+        
+        if self.judgePath(tmp_dname,["C:","Program Files (x86)","OpenRTM-aist","1.1","components"]):
+            dname = [tmp_dname]
+
+        if self.judgePath(tmp_dname,["C:","Program Files","OpenRTM-aist","1.1","components"]):
+            dname = [tmp_dname]
+
+        if self.judgePath(tmp_dname,["","usr","share","openrtm-1.1","components"]):
             dname = [tmp_dname]
 
         wid = self.WidList["manager.components.precreate"]["Widget"]

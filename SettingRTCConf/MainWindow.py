@@ -57,7 +57,7 @@ class MainWindow(QtGui.QMainWindow):
         #self.mgrc = ManagerControl("")
         self.mgrc = None
         
-        
+        self.curFile = ""
 
         #self.mgrc.CreateComp("MyFirstComponent",[".\\MyFirstComponent"])
         #self.mgrc.CreateComp("MyFirstComponent",[".\\MyFirstComponent"])
@@ -131,12 +131,14 @@ class MainWindow(QtGui.QMainWindow):
             self.mgrc = ManagerControl(ba)
             self.createTabs()
 
-            
+            self.curFile = ba           
 
             
         else:
             self.mesBox(u"既にコンフィギュレーションファイルは開いています")
 
+    def saveAs(self):
+        pass
     ##
     #ファイル保存のスロット
     ##
