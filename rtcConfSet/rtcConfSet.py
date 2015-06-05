@@ -532,9 +532,19 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         return True
     def saveControlRTCFile(self, home_dirname, components, filename, cmdName, allCompFlag=False):
-        f = open(home_dirname+"/"+filename, 'w')
-        if len(components) == 0:
-            f.write("rem\n")
+        
+        if os.name == 'posix':
+            f = open(home_dirname+"/"+filename+".sh", 'w')
+            
+        elif os.name == 'nt':
+            f = open(home_dirname+"/"+filename+".bat", 'w')
+            
+        self.writeFileOption(f)
+
+
+        if os.name == 'nt':
+            if len(components) == 0:
+                f.write("rem\n")
 
         
                     
@@ -545,7 +555,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 prop = comp.properties
                 name = prop["naming.names"]
                 path = '/localhost/'+str(name)
-                cmd = "cmd /c " + cmdName + " " + path + "\n"
+                if os.name == 'posix':
+                    cmd = cmdName + " " + path + "\n"
+                elif os.name == 'nt':
+                    cmd = "cmd /c " + cmdName + " " + path + "\n"
+                
                 
                 f.write(cmd)
 
@@ -556,7 +570,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                     prop = comp.properties
                     name = prop["naming.names"]
                     path = '/localhost/'+str(name)
-                    cmd = "cmd /c " + cmdName + " " + path + "\n"
+                    if os.name == 'posix':
+                        cmd = cmdName + " " + path + "\n"
+                    elif os.name == 'nt':
+                        cmd = "cmd /c " + cmdName + " " + path + "\n"
+                    
                 
                     f.write(cmd)
 
@@ -564,19 +582,30 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         f.close()
         
     def saveActiveFile(self, home_dirname, components):
-        self.saveControlRTCFile(home_dirname,components,"active.bat","rtact")
+        self.saveControlRTCFile(home_dirname,components,"active","rtact")
         
     def saveDeactiveFile(self, home_dirname, components):
-        self.saveControlRTCFile(home_dirname,components,"deactive.bat","rtdeact")
+        self.saveControlRTCFile(home_dirname,components,"deactive","rtdeact")
     def saveExitFile(self, home_dirname, components):
-        self.saveControlRTCFile(home_dirname,components,"exit.bat","rtexit",True)
+        self.saveControlRTCFile(home_dirname,components,"exit","rtexit",True)
 
+    def writeFileOption(self, f):
+        if os.name == 'posix':
+            f.write("#!/bin/sh\n")
+            f.write("PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin\n")
+            f.write("script_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)\n")
+            f.write("cd ${script_dir}\n")
+        elif os.name == 'nt':
+            f.write("cd /d %~dp0\n")
+            
     def saveBatFile(self, home_dirname, cpp_dirname, py_dirname, sysfileName, compositeList):
         if os.name == 'posix':
             f = open(home_dirname+"/start.sh", 'w')
-            f.write("#!/bin/sh\n")
+            
         elif os.name == 'nt':
             f = open(home_dirname+"/start.bat", 'w')
+            
+        self.writeFileOption(f)
 
         path = os.path.relpath("../workspace",home_dirname)
         if os.name == 'posix':
@@ -627,9 +656,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         if os.name == 'posix':
             fcomp = open(home_dirname+"/composite.sh", 'w')
-            fcomp.write("#!/bin/sh\n")
         elif os.name == 'nt':
             fcomp = open(home_dirname+"/composite.bat", 'w')
+            
+
+        self.writeFileOption(fcomp)
 
         if len(compositeList) == 0:
             if os.name == 'posix':
@@ -666,9 +697,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         if os.name == 'posix':
             frtsystem = open(home_dirname+"/rtsystem.sh", 'w')
+            self.writeFileOption(frtsystem)
             cmd = "rtresurrect " + sysfileName + "\n"
         elif os.name == 'nt':
             frtsystem = open(home_dirname+"/rtsystem.bat", 'w')
+            self.writeFileOption(frtsystem)
             cmd = "cmd /c rtresurrect " + sysfileName + "\n"
             
         frtsystem.write(cmd)
