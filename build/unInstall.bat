@@ -1,3 +1,3 @@
 cd /d %~dp0
-rtcd_p\unInstall.bat
-rtcdControl\unInstall.bat
+cmd /c rtcd_p\unInstall.bat
+cmd /c rtcdControl\unInstall.bat

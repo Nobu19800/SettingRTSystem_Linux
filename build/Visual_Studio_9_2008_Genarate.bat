@@ -1,3 +1,3 @@
 cd /d %~dp0
-rtcd_p\Visual_Studio_9_2008_Genarate.bat
-rtcdControl\Visual_Studio_9_2008_Genarate.bat
+cmd /c rtcd_p\Visual_Studio_9_2008_Genarate.bat
+cmd /c rtcdControl\Visual_Studio_9_2008_Genarate.bat

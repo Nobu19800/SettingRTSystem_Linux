@@ -1,3 +1,3 @@
 cd /d %~dp0
-rtcd_p\BuildRelease.bat
-rtcdControl\BuildRelease.bat
+cmd /c rtcd_p\BuildRelease.bat
+cmd /c rtcdControl\BuildRelease.bat
