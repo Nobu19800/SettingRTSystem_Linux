@@ -117,6 +117,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         self.rtcdCppFlag = False
         self.rtcdPyFlag = False
 
+        self.rtcdControlprocess = None
+        self.rtcdControlPyprocess = None
+
         self.filename = ""
 
         self.exRTCList = []
@@ -593,8 +596,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         if os.name == 'posix':
             f.write("#!/bin/sh\n")
             f.write("PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin\n")
-            f.write("script_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)\n")
-            f.write("cd ${script_dir}\n")
+            #f.write("script_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)\n")
+            #f.write("cd ${script_dir}\n")
+            f.write("cd `dirname $0`\n")
         elif os.name == 'nt':
             f.write("cd /d %~dp0\n")
             
@@ -880,7 +884,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     def startRTCD_Cpp(self):
         if self.rtcdCppFlag:
             return False
-        self.rtcdCppFlag = True
+        if self.rtcdControlprocess:
+            self.rtcdControlprocess.kill()
+            self.rtcdControlprocess = None
         
         f = open(self.cppDirName+"/rtc.conf", 'w')
         self.saveData(f, self.confList_cpp, "", True)
@@ -894,7 +900,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         try:
             #os.system(com)
-            process = subprocess.Popen(com, stdout=subprocess.PIPE)
+            self.rtcdControlprocess = subprocess.Popen(com, stdout=subprocess.PIPE)
         except:
             info = sys.exc_info()
             tbinfo = traceback.format_tb( info[2] )
@@ -932,7 +938,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     def startRTCD_Py(self):
         if self.rtcdPyFlag:
             return False
-        self.rtcdPyFlag = True
+        if self.rtcdControlPyprocess:
+            self.rtcdControlPyprocess.kill()
+            self.rtcdControlPyprocess = None
+        #self.rtcdPyFlag = True
         #print self.pyDirName+"/rtc.conf"
         f = open(self.pyDirName+"/rtc.conf", 'w')
         self.saveData(f, self.confList_py, "", True)
@@ -947,7 +956,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         #print com
         
         try:
-            process = subprocess.Popen(com, stdout=subprocess.PIPE)
+            self.rtcdControlPyprocess = subprocess.Popen(com, stdout=subprocess.PIPE)
         except:
             info = sys.exc_info()
             tbinfo = traceback.format_tb( info[2] )

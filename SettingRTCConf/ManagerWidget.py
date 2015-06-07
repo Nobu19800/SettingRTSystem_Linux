@@ -148,13 +148,16 @@ class ManagerWidget(MTabWidget):
             dname = [tmp_dname]
 
         
-        if self.judgePath(tmp_dname,["C:","Program Files (x86)","OpenRTM-aist","1.1"]):
+        if self.judgePath(tmp_dname,["C:","Program Files (x86)"]):
             dname = [tmp_dname]
 
-        if self.judgePath(tmp_dname,["C:","Program Files","OpenRTM-aist","1.1"]):
+        if self.judgePath(tmp_dname,["C:","Program Files"]):
             dname = [tmp_dname]
 
-        if self.judgePath(tmp_dname,["","usr","share","openrtm-1.1","components"]):
+        if self.judgePath(tmp_dname,["","usr","share"]):
+            dname = [tmp_dname]
+
+        if self.judgePath(tmp_dname,["","usr","local"]):
             dname = [tmp_dname]
 
         wid = self.WidList["manager.components.precreate"]["Widget"]
