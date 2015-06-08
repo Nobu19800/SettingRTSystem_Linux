@@ -172,6 +172,9 @@ class MainWindow(QtGui.QMainWindow):
         self.saveAsAct.setShortcuts(QtGui.QKeySequence.SaveAs)
         self.saveAsAct.triggered.connect(self.saveAs)
 
+        self.createPackageAct = QtGui.QAction("&Create &Package",self)
+        self.createPackageAct.triggered.connect(self.createPackage)
+
     def deleteTabs(self):
         if self.tab_widget_cpp:
             self.tab_widget.removeTab(self.tab_widget.indexOf(self.tab_widget_cpp))
@@ -189,6 +192,8 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addAction(self.saveAct)
         self.fileMenu.addAction(self.saveAsAct)
+        self.fileMenu.addAction(self.createPackageAct)
+        
 
 
     def createTabs(self, filapath):
@@ -334,6 +339,22 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.saveFile(self.curFile)
             return True
+    def createPack(self, filename):
+        try:
+            self.control_comp._rtcconf._ptr().createProject(filename)
+        except:
+            info = sys.exc_info()
+            tbinfo = traceback.format_tb( info[2] )
+            for tbi in tbinfo:
+                print tbi
+                
+    def createPackage(self):
+        fileName = QtGui.QFileDialog.getSaveFileName(self,u"保存", "","Config File (*.conf);;All Files (*)")
+        if fileName.isEmpty():
+            return False
+        ba = str(fileName.toLocal8Bit())
+
+        self.createPack(ba)
 
     ##
     #ファイル保存のスロット

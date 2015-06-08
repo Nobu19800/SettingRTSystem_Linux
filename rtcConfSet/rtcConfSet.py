@@ -16,12 +16,13 @@ import sys, traceback
 import time
 import struct
 import subprocess
+import glob
 
 sys.path.append(".")
 sys.path.append("../")
 
 import datetime
-
+import shutil
 
 import rtctree.tree
 import rtctree.path
@@ -127,7 +128,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
 
     def open(self, filename):
-        
+        self.rtcdCppFlag = True
+        self.rtcdPyFlag = True
         self.filepath = os.path.abspath(filename)
         #sys.stdout.write(filename)
         #print filename
@@ -136,7 +138,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         self.exRTCList = []
         
-        fileName = dirname[0]+"/"+dirname[1]
+        #fileName = dirname[0]+"/"+dirname[1]
+        fileName = os.path.join(dirname[0],dirname[1])
         #print fileName
         if os.path.exists(fileName):
             f = open(fileName, 'rb')
@@ -178,7 +181,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             pname = os.path.basename(dname)
             
             if name != pname:
-                dname = dname + "/" + name
+                
+                #dname = dname + "/" + name
+                dname = os.path.join(dname,name)
                 if not os.path.exists(dname):
                     os.mkdir(dname)
 
@@ -214,7 +219,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     def saveConfigFile(self, comp ,filePath, rtcconffile):
         name = comp.name.split(".")[0]
         
-        compname = filePath+"/"+name+".conf"
+        #compname = filePath+"/"+name+".conf"
+        compname = os.path.join(filePath,name+".conf")
         f = open(compname, 'w')
 
         s = comp.category + "." + name + ".config_file: " + os.path.relpath(compname).replace("\\","/") + "\n"
@@ -374,7 +380,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         dirname = self.setFolder(filename)
         
         
-        f = open(dirname[0]+"/"+dirname[1], "wb")
+        #f = open(dirname[0]+"/"+dirname[1], "wb")
+        f = open(os.path.join(dirname[0],dirname[1]), "wb")
         r = len(self.exRTCList)
         d = struct.pack("i", r)
         f.write(d)
@@ -442,9 +449,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 print tbi
 
         f.close()
-        
-        sysFileName = dirname[0]+"/"+dirname[1].split(".")[0]+".rtsys"
 
+                
+        #sysFileName = dirname[0]+"/"+dirname[1].split(".")[0]+".rtsys"
+        sysFileName = os.path.join(dirname[0],dirname[1].split(".")[0])+".rtsys"
         
         
         for e in self.exRTCList:
@@ -882,7 +890,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
     # boolean startRTCD()
     def startRTCD_Cpp(self):
-        if self.rtcdCppFlag:
+        if not self.rtcdCppFlag:
             return False
         if self.rtcdControlprocess:
             self.rtcdControlprocess.kill()
@@ -936,7 +944,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         # Must return: result
 
     def startRTCD_Py(self):
-        if self.rtcdPyFlag:
+        if not self.rtcdPyFlag:
             return False
         if self.rtcdControlPyprocess:
             self.rtcdControlPyprocess.kill()
@@ -1090,6 +1098,169 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         return True
     def getExRTCList(self):
         return (True,self.exRTCList)
+
+    def createNonExistFolder(self, path):
+        #filename = os.path.abspath(path)
+        #dname = os.path.dirname(filename)
+        #fname = os.path.basename(filename)
+        #name, ext = os.path.splitext(fname)
+        #pname = os.path.basename(dname)
+        
+        dnameList = os.path.relpath(path).replace("\\","/").split("/")
+
+        epath = "./"
+        for d in dnameList:
+            epath = os.path.join(epath, d)
+            if not os.path.exists(epath):
+                
+                os.mkdir(epath)
+        
+
+    def saveDir(self, path, filepath):
+        
+        path.replace("\\","/")
+        if path == "./" or path == ".":
+            return
+        p = os.path.relpath(path,"../").replace("\\","/")
+        
+        
+        plist = p.split("/")
+        if plist[0] == "..":
+            return
+
+        p2 = os.path.relpath(path, self.home_dirname).replace("\\","/")
+        plist = p2.split("/")
+        
+        if plist[0] != "..":
+            return
+        
+        filename = os.path.abspath(filepath)
+        dname = os.path.dirname(filename)
+
+        
+        fn = os.path.join(dname,p)
+        
+        self.createNonExistFolder(os.path.join(fn,"../"))
+
+        
+        if os.path.exists(fn):
+            shutil.rmtree(fn)
+        shutil.copytree(path, fn)
+        
+    def getUseDll(self, root, filename):
+        nameList = []
+        for name in glob.glob(os.path.join(root,filename)):
+            nameList.append(name)
+        return nameList
+
+    def createProject(self, filepath):
+        if not self.rtcdCppFlag:
+            return False
+        if not self.rtcdPyFlag:
+            return False
+        
+
+        filename = os.path.abspath(filepath)
+        dname = os.path.dirname(filename)
+        fname = os.path.basename(filename)
+        name, ext = os.path.splitext(fname)
+        pname = os.path.basename(dname)
+
+        
+        if name != pname:
+            dname = os.path.join(dname,name)
+            #dname = dname + "/" + name
+            if not os.path.exists(dname):
+                os.mkdir(dname)
+        
+
+        f = open(os.path.join(dname,fname), 'w')
+        f.close()
+
+
+        path_list = []
+        for c in self.confList_cpp:
+            if c.id == "manager.modules.load_path":
+                l = c.data.split(",")
+                for i in l:
+                    path_list.append(i)
+        for c in self.confList_py:
+            if c.id == "manager.modules.load_path":
+                l = c.data.split(",")
+                for i in l:
+                    path_list.append(i)
+
+        for l in path_list:
+            self.saveDir(l,os.path.join(dname,fname))
+
+        homedir_fp = os.path.relpath(self.home_dirname,"../")
+        fn = os.path.join(dname,os.path.relpath(homedir_fp))
+        
+        self.createNonExistFolder(os.path.join(fn,"../"))
+
+        if os.path.exists(fn):
+            shutil.rmtree(fn)
+        shutil.copytree(self.home_dirname, fn)
+
+        manager_fn = os.path.join(dname,"Manager")
+        if os.path.exists(manager_fn):
+            shutil.rmtree(manager_fn)
+        shutil.copytree("../Manager", manager_fn)
+
+        wp = os.path.join(dname,"workspace")
+        if not os.path.exists(wp):
+                os.mkdir(wp)
+
+        if os.name == 'nt':
+            omni_root = os.environ.get("OMNI_ROOT")
+            rtm_root = os.environ.get("RTM_ROOT")
+            dlist = []
+            if omni_root:
+                pl = self.getUseDll(omni_root,"bin/*/omniDynamic*.dll")
+                dlist.extend(pl[:])
+                pl = self.getUseDll(omni_root,"bin/*/omnithread*.dll")
+                dlist.extend(pl[:])
+                pl = self.getUseDll(omni_root,"bin/*/omniORB*.dll")
+                dlist.extend(pl[:])
+            if rtm_root:
+                pl = self.getUseDll(rtm_root,"bin/coil*.dll")
+                dlist.extend(pl[:])
+                pl = self.getUseDll(rtm_root,"bin/RTC*.dll")
+                dlist.extend(pl[:])
+
+            for d in dlist:
+                d_fname = os.path.basename(d)
+                cpp_manager_fn = os.path.join(manager_fn,"C++/rtcd_p/Release")
+                shutil.copy2(d, os.path.join(cpp_manager_fn,d_fname))
+
+        sname = os.path.join(dname,"start")
+            
+        if os.name == 'posix':
+            f = open(sname+".sh", 'w')
+            self.writeFileOption(f)
+            com = homedir_fp.replace("\\","/") + "/start.sh"
+            com = "sh " + com
+            f.write(com)
+            
+        elif os.name == 'nt':
+            f = open(sname+".bat", 'w')
+            self.writeFileOption(f)
+            com = homedir_fp.replace("/","\\") + "\\start.bat"
+            com = "cmd /c " + com
+            f.write(com)
+            
+
+        
+
+        f.close()
+        """homedir_fp
+        f = open(os.path.join(dname,fname), 'w')
+        """
+        #print self.home_dirname
+        #print path_list
+        #self.confList_cpp = []
+        #self.confList_py = []
+        return True
         
 
 # </rtc-template>

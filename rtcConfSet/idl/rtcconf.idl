@@ -38,6 +38,7 @@ module RTCConfData {
 		boolean setSystem();
 		boolean setExRTCList(in stringSeq name);
 		boolean getExRTCList(out stringSeq name);
+		boolean createProject(in string filepath);
 	};
 
 };

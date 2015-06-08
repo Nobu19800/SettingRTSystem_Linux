@@ -108,6 +108,11 @@ class rtcdWidget(MTabWidget):
         self.WidList["filepath"]["Layout"].addWidget(self.rtcdButton)
         self.rtcdButton.clicked.connect(self.rtcdSlot)
 
+        self.addTextBox("packagepath", u"パッケージ名", [""] , "")
+        self.pkgButton = QtGui.QPushButton(u"パッケージ生成")
+        self.WidList["packagepath"]["Layout"].addWidget(self.pkgButton)
+        self.pkgButton.clicked.connect(self.pkgSlot)
+
         
         self.treelayout = QtGui.QVBoxLayout()
         
@@ -140,6 +145,14 @@ class rtcdWidget(MTabWidget):
         #print self.getRTCList("localhost")
         #self.setRTCTree()
         #print self.compList
+
+
+    def pkgSlot(self):
+        filename = str(self.WidList["packagepath"]["Widget"].text().toLocal8Bit())
+        if filename != "":
+            self.parent.createPack(filename)
+        else:
+            self.mesBox(u"ファイル名を入力してください")
 
     def addRTCSlot(self):
         
