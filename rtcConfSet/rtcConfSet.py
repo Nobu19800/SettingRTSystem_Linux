@@ -612,59 +612,66 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
     def saveBatFile(self, home_dirname, cpp_dirname, py_dirname, sysfileName, compositeList):
         if os.name == 'posix':
-            f = open(home_dirname+"/start.sh", 'w')
+            fname = home_dirname+"/start.sh"
+            
             
         elif os.name == 'nt':
-            f = open(home_dirname+"/start.bat", 'w')
+            fname = home_dirname+"/start.bat"
             
-        self.writeFileOption(f)
 
-        path = os.path.relpath("../workspace",home_dirname)
-        if os.name == 'posix':
-            path = path.replace("\\","/")
-        elif os.name == 'nt':
-            path = path.replace("/","\\")
-            
-           
-        cmd = "cd " + path + "\n"
-        f.write(cmd)
+        if not os.path.exists(fname):
+            f = open(fname, 'w')
+            self.writeFileOption(f)
 
-        if os.name == 'posix':
-            #path = "rtcd".replace("\\","/")
-            cmd = "rtcd" + " -f " + cpp_dirname + "/rtc.conf" + "&\n"
-        elif os.name == 'nt':
-            path = "../Manager/C++/rtcd_p/Release/rtcd_p.exe".replace("/","\\")
-            cmd = "start " + path + " -f " + cpp_dirname + "/rtc.conf" + "\n"
-        f.write(cmd)
-
-        path = "../Manager/Python/rtcd.py"
-        if os.name == 'posix':
-            path = path.replace("\\","/")
-            cmd = "python " + path + " -f " + py_dirname + "/rtc.conf" + "&\n"
-        elif os.name == 'nt':
-            path = path.replace("/","\\")
-            cmd = "start python " + path + " -f " + py_dirname + "/rtc.conf" + "\n"
-        
-        f.write(cmd)
-
-        path = os.path.relpath(home_dirname,"../workspace")
-        if os.name == 'posix':
-            path.replace("\\","/")
+            path = os.path.relpath("../workspace",home_dirname)
+            if os.name == 'posix':
+                path = path.replace("\\","/")
+            elif os.name == 'nt':
+                path = path.replace("/","\\")
+                
+               
             cmd = "cd " + path + "\n"
-        elif os.name == 'nt':
-            path.replace("/","\\")
-            cmd = "cd " + path + "\n"
-        f.write(cmd)
+            f.write(cmd)
 
-        f.write("sleep 5\n")
+            if os.name == 'posix':
+                #path = "rtcd".replace("\\","/")
+                cmd = "rtcd" + " -f " + cpp_dirname + "/rtc.conf" + "&\n"
+            elif os.name == 'nt':
+                path = "../Manager/C++/rtcd_p/Release/rtcd_p.exe".replace("/","\\")
+                cmd = "start " + path + " -f " + cpp_dirname + "/rtc.conf" + "\n"
+            f.write(cmd)
 
-        if os.name == 'posix':
-            f.write("sh composite.sh\n")
-            f.write("sh rtsystem.sh\n")
+            path = "../Manager/Python/rtcd.py"
+            if os.name == 'posix':
+                path = path.replace("\\","/")
+                cmd = "python " + path + " -f " + py_dirname + "/rtc.conf" + "&\n"
+            elif os.name == 'nt':
+                path = path.replace("/","\\")
+                cmd = "start python " + path + " -f " + py_dirname + "/rtc.conf" + "\n"
+            
+            f.write(cmd)
 
-        elif os.name == 'nt':
-            f.write("cmd /c composite.bat\n")
-            f.write("cmd /c rtsystem.bat\n")
+            path = os.path.relpath(home_dirname,"../workspace")
+            if os.name == 'posix':
+                path.replace("\\","/")
+                cmd = "cd " + path + "\n"
+            elif os.name == 'nt':
+                path.replace("/","\\")
+                cmd = "cd " + path + "\n"
+            f.write(cmd)
+
+            f.write("sleep 5\n")
+
+            if os.name == 'posix':
+                f.write("sh composite.sh\n")
+                f.write("sh rtsystem.sh\n")
+
+            elif os.name == 'nt':
+                f.write("cmd /c composite.bat\n")
+                f.write("cmd /c rtsystem.bat\n")
+
+
+            f.close()
 
         if os.name == 'posix':
             fcomp = open(home_dirname+"/composite.sh", 'w')
@@ -674,11 +681,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         self.writeFileOption(fcomp)
 
-        if len(compositeList) == 0:
-            if os.name == 'posix':
-                pass
-            elif os.name == 'nt':
-                fcomp.write("rem\n")
+        
         for c in compositeList:
             
             path = '/localhost/'+c["path"]+c["comp"].name
@@ -720,7 +723,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         frtsystem.close()
         
-        f.close()
+        
 
     def getConfData(self, filename, prop, defFile):
         prop.setDefaults(OpenRTM_aist.default_config)
@@ -1153,6 +1156,33 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             nameList.append(name)
         return nameList
 
+
+    def createDirectDirScript(self, name, dname, homedir_fp):
+        sname = os.path.join(dname,name)
+            
+        if os.name == 'posix':
+            fname = sname+".sh"
+            if os.path.exists(fname):
+                return
+            f = open(fname, 'w')
+            self.writeFileOption(f)
+            com = os.path.join(homedir_fp,name) + ".sh"
+            com = "sh " + com.replace("\\","/")
+            f.write(com)
+            
+        elif os.name == 'nt':
+            fname = sname+".bat"
+            if os.path.exists(fname):
+                return
+            f = open(fname, 'w')
+            self.writeFileOption(f)
+            com = com = os.path.join(homedir_fp,name) + ".bat"
+            com = "cmd /c " + com.replace("/","\\")
+            f.write(com)
+        
+
+        f.close()
+
     def createProject(self, filepath):
         if not self.rtcdCppFlag:
             return False
@@ -1233,26 +1263,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 cpp_manager_fn = os.path.join(manager_fn,"C++/rtcd_p/Release")
                 shutil.copy2(d, os.path.join(cpp_manager_fn,d_fname))
 
-        sname = os.path.join(dname,"start")
-            
-        if os.name == 'posix':
-            f = open(sname+".sh", 'w')
-            self.writeFileOption(f)
-            com = homedir_fp.replace("\\","/") + "/start.sh"
-            com = "sh " + com
-            f.write(com)
-            
-        elif os.name == 'nt':
-            f = open(sname+".bat", 'w')
-            self.writeFileOption(f)
-            com = homedir_fp.replace("/","\\") + "\\start.bat"
-            com = "cmd /c " + com
-            f.write(com)
-            
-
         
-
-        f.close()
+            
+        self.createDirectDirScript("start", dname, homedir_fp)
+        self.createDirectDirScript("active", dname, homedir_fp)
+        self.createDirectDirScript("deactive", dname, homedir_fp)
+        self.createDirectDirScript("exit", dname, homedir_fp)
         """homedir_fp
         f = open(os.path.join(dname,fname), 'w')
         """
