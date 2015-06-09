@@ -158,11 +158,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         if dirname[2] == "" or dirname[3] == "":
             if not os.path.exists("tmp"):
                 os.mkdir("tmp")
-            if not os.path.exists("tmp/C++"):
-                os.mkdir("tmp/C++")
+            if not os.path.exists("tmp/Cpp"):
+                os.mkdir("tmp/Cpp")
             if not os.path.exists("tmp/Python"):
                 os.mkdir("tmp/Python")
-            self.cppDirName = "tmp/C++"
+            self.cppDirName = "tmp/Cpp"
             self.pyDirName = "tmp/Python"
 
         return True
@@ -187,7 +187,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 if not os.path.exists(dname):
                     os.mkdir(dname)
 
-            self.cppDirName = dname+"/C++"
+            self.cppDirName = dname+"/Cpp"
             if not os.path.exists(self.cppDirName):
                 os.mkdir(self.cppDirName)
                 
@@ -637,7 +637,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 #path = "rtcd".replace("\\","/")
                 cmd = "rtcd" + " -f " + cpp_dirname + "/rtc.conf" + "&\n"
             elif os.name == 'nt':
-                path = "../Manager/C++/rtcd_p/Release/rtcd_p.exe".replace("/","\\")
+                path = "../Manager/Cpp/rtcd_p/Release/rtcd_p.exe".replace("/","\\")
                 cmd = "start " + path + " -f " + cpp_dirname + "/rtc.conf" + "\n"
             f.write(cmd)
 
@@ -1260,7 +1260,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
             for d in dlist:
                 d_fname = os.path.basename(d)
-                cpp_manager_fn = os.path.join(manager_fn,"C++/rtcd_p/Release")
+                cpp_manager_fn = os.path.join(manager_fn,"Cpp/rtcd_p/Release")
                 shutil.copy2(d, os.path.join(cpp_manager_fn,d_fname))
 
         

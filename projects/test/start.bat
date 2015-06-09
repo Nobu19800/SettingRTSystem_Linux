@@ -1,5 +1,5 @@
 cd ..\..\workspace
-start ..\Manager\C++\rtcd_p\Release\rtcd_p.exe -f ../projects/test/C++/rtc.conf
+start ..\Manager\Cpp\rtcd_p\Release\rtcd_p.exe -f ../projects/test/Cpp/rtc.conf
 start python ..\Manager\Python\rtcd.py -f ../projects/test/Python/rtc.conf
 cd ..\projects\test
 sleep 5
