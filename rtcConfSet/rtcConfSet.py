@@ -603,7 +603,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     def writeFileOption(self, f):
         if os.name == 'posix':
             f.write("#!/bin/sh\n")
-            f.write("PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin\n")
+            #f.write("PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin\n")
             #f.write("script_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)\n")
             #f.write("cd ${script_dir}\n")
             f.write("cd `dirname $0`\n")
