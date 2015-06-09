@@ -6,4 +6,4 @@ cd `dirname $0`
 cp rtcd_p/rtcd_p ../Manager/Cpp/rtcd_p/rtcd_p
 
 
-copy /Y rtcdControl/src/rtcdControlComp ../rtcdControl/src/rtcdControlComp
+cp rtcdControl/src/rtcdControlComp ../rtcdControl/src/rtcdControlComp
