@@ -1,4 +1,4 @@
 cd /d %~dp0
 cmd /c rtexit /localhost/rtcConfSetReq0.rtc
-start python startNamingService.py
+cmd /c python startNamingService.py
 dist\SettingRTSystem

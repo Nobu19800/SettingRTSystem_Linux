@@ -623,6 +623,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             f = open(fname, 'w')
             self.writeFileOption(f)
 
+            shutil.copy2("../startNamingService.py", os.path.join(home_dirname,"startNamingService.py"))
+            if os.name == 'posix':
+                cmd = "python startNamingService.py\n"
+            elif os.name == 'nt':
+                cmd = "cmd /c python startNamingService.py\n"
+                
+            f.write(cmd)
+            
             path = os.path.relpath("../workspace",home_dirname)
             if os.name == 'posix':
                 path = path.replace("\\","/")
