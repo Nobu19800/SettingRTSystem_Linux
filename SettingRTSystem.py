@@ -54,16 +54,25 @@ def main():
         #process_confset = os.system("sh rtcConfSet.sh&")
     elif os.name == 'nt':
         process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf", stdout=subprocess.PIPE)
+        #process_rtcd = os.system("start python Manager/Python/rtcd.py -f Manager/Python/rtc.conf")
         process_confset = subprocess.Popen("rtcConfSet.bat", stdout=subprocess.PIPE)
         #process_confset = os.system("start rtcConfSet.bat")
 
-            
+    
+
     app = QtGui.QApplication([""])
     mainWin = SettingRTCWindow.MainWindow.MainWindow()
     mainWin.show()
     app.exec_()
-    #mgrc.createComp("MyFirstComponent",[".\\MyFirstComponent"])
-    #mgrc.createComp("MyFirstComponent",[".\\MyFirstComponent"])
+
+    
+
+    if os.name == 'posix':
+        subprocess.Popen("python exitRTCs.py".split(" "), stdout=subprocess.PIPE)
+    elif os.name == 'nt':
+        subprocess.Popen("python exitRTCs.py", stdout=subprocess.PIPE)
+        
+    
     
     
     
