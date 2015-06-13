@@ -84,7 +84,7 @@ class rtcdWidget(MTabWidget):
         MTabWidget.__init__(self, None, parent)
         self.parent = parent
         self.addTextBox("textBox", u"IPアドレス", ["localhost"] , "localhost")
-        self.addTextBox("filepath", u"ファイル名", [""] , "")
+        self.addTextBox("filepath", u"ファイル名を直接入力してください", [""] , "")
 
         self.addFilePathButton = QtGui.QPushButton(u"ファイル名設定")
         self.WidList["filepath"]["Layout"].addWidget(self.addFilePathButton)
@@ -108,7 +108,7 @@ class rtcdWidget(MTabWidget):
         self.WidList["filepath"]["Layout"].addWidget(self.rtcdButton)
         self.rtcdButton.clicked.connect(self.rtcdSlot)
 
-        self.addTextBox("packagepath", u"パッケージ名", [""] , "")
+        self.addTextBox("packagepath", u"パッケージ名を直接入力してください", [""] , "")
         self.pkgButton = QtGui.QPushButton(u"パッケージ生成")
         self.WidList["packagepath"]["Layout"].addWidget(self.pkgButton)
         self.pkgButton.clicked.connect(self.pkgSlot)

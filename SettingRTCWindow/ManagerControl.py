@@ -143,6 +143,7 @@ class ManagerControl:
                         value.append(n["default"])
                     self.confList.append({"default":n["default"],"type":n["type"],"list":n["list"],"name":n["name"],"label":n["label"],"value":value})
             
+            
         except:
             return False
 
