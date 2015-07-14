@@ -3,6 +3,7 @@
 #include <iostream>
 #include <rtm/Manager.h>
 #include <coil/stringutil.h>
+#include "LoadRTCs.h"
 
 
 template <class T>
@@ -31,6 +32,7 @@ int main(int argc, char** argv)
 {
 	RTC::Manager* manager;
 	manager = RTC::Manager::init(argc, argv);
+	
 
 #ifdef _WINDOWS
 	std::string path = getParam("manager.modules.load_path");
@@ -54,7 +56,12 @@ int main(int argc, char** argv)
 
 #endif
 
+	
+
 	manager->activateManager();
+
+	LoadRTCs *loadRTCsObject = new LoadRTCs(manager);
+	loadRTCsObject->openFile();
 
 	manager->runManager();
 

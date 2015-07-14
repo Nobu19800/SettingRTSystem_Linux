@@ -37,16 +37,19 @@ from PyQt4 import QtCore, QtGui
 import SettingRTCWindow.MainWindow
 
 
-
-
-
+import SettingRTSystem_rc
 
         
 ##
 # @brief 
 def main():
     #mgrc = ManagerControl("")
-    
+    app = QtGui.QApplication([""])
+    splash_pix = QtGui.QPixmap(':/images/splash_loading.png')
+    splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
+    splash.show()
+    app.processEvents()
     
     if os.name == 'posix':
         process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf".split(" "), stdout=subprocess.PIPE)
@@ -60,9 +63,10 @@ def main():
 
     
 
-    app = QtGui.QApplication([""])
+    
     mainWin = SettingRTCWindow.MainWindow.MainWindow()
     mainWin.show()
+    splash.finish(mainWin)
     app.exec_()
 
     

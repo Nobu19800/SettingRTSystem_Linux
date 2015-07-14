@@ -51,6 +51,7 @@ from SettingRTCWindow.rtcdWidget import rtcdWidget
 
 import imp
 
+import SettingRTCWindow.RTCListWindow
 
 
 def connectServicePort(obj1, obj2, c_name):
@@ -99,7 +100,11 @@ class MainWindow(QtGui.QMainWindow):
         self.rtcd_widget = rtcdWidget(self)
 
         self.tab_widget.addTab(self.rtcd_widget, u"RTCD")
+
+        self.rtclistWindow = None
+        self.rtclistArea = None
         
+
         self.setCentralWidget(self.tab_widget)
 
         self.createAction()
@@ -182,6 +187,10 @@ class MainWindow(QtGui.QMainWindow):
         if self.tab_widget_python:
             self.tab_widget.removeTab(self.tab_widget.indexOf(self.tab_widget_python))
             self.tab_widget_python = None
+        if self.rtclistArea:
+            self.tab_widget.removeTab(self.tab_widget.indexOf(self.rtclistArea))
+            self.rtclistWindow = None
+            self.rtclistArea = None
     ##
     #メニューの作成の関数
     ##
@@ -247,8 +256,42 @@ class MainWindow(QtGui.QMainWindow):
         if self.tab_widget_python == None:
             self.tab_widget_python = TabWidget(self.mgrc_py,"Python")
             self.tab_widget.addTab(self.tab_widget_python, u"Python")
-        
-        
+
+        if self.rtclistWindow == None:
+            """filename = "RTCListWindow"
+            filepath = ["SettingRTCWindow"]
+            sys.path.append(filepath[0])
+            (file, pathname, description) = imp.find_module(filename, filepath)
+            RTCListWindow = imp.load_module(filename, file, pathname, description)
+            """
+            self.rtclistWindow = SettingRTCWindow.RTCListWindow.RTC_Window(self)
+            self.rtclistArea = SettingRTCWindow.RTCListWindow.ScrollArea()
+            
+            self.tab_widget.addTab(self.rtclistArea, u"RTCのリスト")
+            try:
+                data = self.control_comp._rtcconf._ptr().getProfileList()
+            
+                self.rtclistWindow.loadList(data[1])
+            except:
+                info = sys.exc_info()
+                tbinfo = traceback.format_tb( info[2] )
+                for tbi in tbinfo:
+                    print tbi
+            
+            self.rtclistArea.setWidget(self.rtclistWindow)
+
+    def createComp(self, name, type):
+        try:
+            ans = self.control_comp._rtcconf._ptr().createComp(name, type)
+            if ans == False:
+                self.mesBox(u"起動に失敗しました")
+        except:
+            info = sys.exc_info()
+            tbinfo = traceback.format_tb( info[2] )
+            for tbi in tbinfo:
+                print tbi
+
+    
 
     def getFunc(self, filename, filepath):
         try:
@@ -315,7 +358,10 @@ class MainWindow(QtGui.QMainWindow):
                 for tbi in tbinfo:
                     print tbi
     
+
+    
         
+
     def saveFile(self, filename):
         self.setDataCpp()
         self.setDataPy()

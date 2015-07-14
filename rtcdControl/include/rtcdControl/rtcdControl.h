@@ -57,6 +57,7 @@ class rtcdControl
    */
   ~rtcdControl();
 
+  
   // <rtc-template block="public_attribute">
   
   // </rtc-template>

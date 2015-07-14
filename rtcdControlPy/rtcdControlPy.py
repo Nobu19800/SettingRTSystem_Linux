@@ -10,6 +10,8 @@
 
 """
 import sys
+import traceback
+import os
 import time
 sys.path.append(".")
 
@@ -19,7 +21,9 @@ import rtctree.tree
 import RTC
 import OpenRTM_aist
 
+import imp
 
+import LoadRTCs
 
 import rtcControl_idl
 
@@ -28,6 +32,9 @@ import rtcControl_idl
 import omniORB
 from omniORB import CORBA, PortableServer
 import rtcControl, rtcControl__POA
+
+
+
 
 
 class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
@@ -42,6 +49,9 @@ class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
         Initialise member variables here
         """
         self.comp = comp
+        #self.compList = {}
+        self.LoadRTCs = LoadRTCs.LoadRTCs(comp.manager)
+        self.LoadRTCs.openFile()
 
     # boolean getRTC(out rtcPathSeq paths)
     def getRTC(self):
@@ -52,17 +62,27 @@ class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
 
     # boolean createComp(in string filename, in string filepath)
     def createComp(self, filename, filepath):
-        return True
+        return self.LoadRTCs.createComp(filename, filepath)
+    
         raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
         # *** Implement me
         # Must return: result
 
+    
+
     # boolean removeComp(in string name)
-    def removeComp(self, name):
-        return False
+    def removeComp(self, filename):
+        return self.LoadRTCs.createComp(filename)
+        
         raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
         # *** Implement me
         # Must return: result
+
+    
+    def getCompList(self):
+        return self.LoadRTCs.getCompList()
+        
+
 
 # </rtc-template>
 
@@ -108,6 +128,8 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 		"""
 		"""
 		self._rtcControl_py = RTCDataInterface_i(self)
+                
+		#print self._rtcControl_py.createComp("MySecondComponent","..\\Components\\MySecondComponent")
 		
 
 
@@ -194,7 +216,16 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 		#
 		#
 	def onActivated(self, ec_id):
-	
+                """try:
+                    self._rtcControl_py.createComp("MySecondComponent","..\\Components\\MySecondComponent")
+                    self._rtcControl_py.createComp("MySecondComponent","..\\Components\\MySecondComponent")
+                    self._rtcControl_py.createComp("MySecondComponent","..\\Components\\MySecondComponent")
+                except:
+                    info = sys.exc_info()
+                    tbinfo = traceback.format_tb( info[2] )
+                    for tbi in tbinfo:
+                        print tbi"""
+                
 		return RTC.RTC_OK
 	
 		##
@@ -208,8 +239,16 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 		#
 		#
 	def onDeactivated(self, ec_id):
-	
-		return RTC.RTC_OK
+            #for c in self._rtcControl_py.compList["MySecondComponent"]["compList"]:
+            #    print c._exiting
+            """try:
+                print self._rtcControl_py.getCompList()
+            except:
+                info = sys.exc_info()
+                tbinfo = traceback.format_tb( info[2] )
+                for tbi in tbinfo:
+                    print tbi"""
+            return RTC.RTC_OK
 	
 		##
 		#

@@ -12,6 +12,7 @@
 
 
 import os.path
+import traceback
 import sys, traceback
 import time
 import struct
@@ -61,6 +62,9 @@ import RTCConfData, RTCConfData__POA
 import rtcControl, rtcControl__POA
 
 
+from wasanbon.core.rtc.rtcprofile import RTCProfile
+
+
 def connectServicePort(obj1, obj2, c_name):
 
     obj1.disconnect_all()
@@ -98,6 +102,252 @@ def WriteString(a, ofs):
 
 
 
+def searchFile(name, dir):
+    wk = os.walk(dir)
+    for i in wk:
+        for f in i[2]:
+            if f == name:
+                filepath = os.path.join(i[0],f)
+                return filepath
+    return ""
+
+
+def getDirList(dir):
+    ans = []
+    files = os.listdir(dir)
+    for f in files:
+        path = os.path.join(dir,f)
+        if os.path.isdir(path):
+            ans.append(f)
+    return ans
+
+
+
+def decodestr(s):
+    if isinstance(s, str):
+        return s.decode('utf-8')
+    return s
+
+class RTComponentProfile():
+    def __init__(self):
+        self.compPath = "../Components"
+
+    def setBasicInfo_doc(self, doc):
+        reference = self.getKeyItem(doc,"rtcDoc:reference")
+        license = self.getKeyItem(doc,"rtcDoc:license")
+        creator = self.getKeyItem(doc,"rtcDoc:creator")
+        algorithm = self.getKeyItem(doc,"rtcDoc:algorithm")
+        inouts = self.getKeyItem(doc,"rtcDoc:inout")
+        description = self.getKeyItem(doc,"rtcDoc:description")
+        return RTCConfData.BasicInfo_Doc(reference,license,creator,algorithm,inouts,description)
+
+    def setBasicInfo(self, rp):
+        type = self.getKeyItem(rp.basicInfo,"xsi:type")
+        saveProject = self.getKeyItem(rp.basicInfo,"rtcExt:saveProject")
+        updateDate = self.getKeyItem(rp.basicInfo,"rtc:updateDate")
+        creationDate = self.getKeyItem(rp.basicInfo,"rtc:creationDate")
+        abstracts = self.getKeyItem(rp.basicInfo,"rtc:abstract")
+        version = self.getKeyItem(rp.basicInfo,"rtc:version")
+        vendor = self.getKeyItem(rp.basicInfo,"rtc:vendor")
+        maxInstances = self.getKeyItem(rp.basicInfo,"rtc:maxInstances")
+        executionType = self.getKeyItem(rp.basicInfo,"rtc:executionType")
+        executionRate = self.getKeyItem(rp.basicInfo,"rtc:executionRate")
+        description = self.getKeyItem(rp.basicInfo,"rtc:description")
+        category = self.getKeyItem(rp.basicInfo,"rtc:category")
+        componentKind = self.getKeyItem(rp.basicInfo,"rtc:componentKind")
+        activityType = self.getKeyItem(rp.basicInfo,"rtc:activityType")
+        componentType = self.getKeyItem(rp.basicInfo,"rtc:componentType")
+        name = self.getKeyItem(rp.basicInfo,"rtc:name")
+        doc = self.setBasicInfo_doc(rp.basicInfo.doc)
+        return RTCConfData.BasicInfo(type,saveProject,updateDate,creationDate,abstracts,version,vendor,maxInstances,executionType,executionRate,description,category,componentKind,activityType,componentType,name,doc)
+        
+
+    def setAction(self, status):
+        type = self.getKeyItem(status,"xsi:type")
+        implemented = decodestr(status.implemented)
+
+        return RTCConfData.Action(type, implemented)
+
+    def setActions(self, rp):
+        OnInitialize = self.setAction(rp.actions.OnInitialize)
+        OnFinalize = self.setAction(rp.actions.OnFinalize)
+        OnStartup = self.setAction(rp.actions.OnStartup)
+        OnShutdown = self.setAction(rp.actions.OnShutdown)
+        OnActivated = self.setAction(rp.actions.OnActivated)
+        OnDeactivated = self.setAction(rp.actions.OnDeactivated)
+        OnAborting = self.setAction(rp.actions.OnAborting)
+        OnError = self.setAction(rp.actions.OnError)
+        OnReset = self.setAction(rp.actions.OnReset)
+        OnExecute = self.setAction(rp.actions.OnExecute)
+        OnStateUpdate = self.setAction(rp.actions.OnStateUpdate)
+        OnRateChanged = self.setAction(rp.actions.OnRateChanged)
+        OnAction = self.setAction(rp.actions.OnAction)
+        OnModeChanged = self.setAction(rp.actions.OnModeChanged)
+
+        return RTCConfData.Actions(OnInitialize,OnFinalize,OnStartup,OnShutdown,OnActivated,OnDeactivated,OnAborting,OnError,OnReset,OnExecute,OnStateUpdate,OnRateChanged,OnAction,OnModeChanged)
+
+    def setConfiguration_Doc(self, doc):
+        constraint = self.getKeyItem(doc,"rtcDoc:constraint")
+        range = self.getKeyItem(doc,"rtcDoc:range")
+        unit = self.getKeyItem(doc,"rtcDoc:unit")
+        description = self.getKeyItem(doc,"rtcDoc:description")
+        defaultValue = self.getKeyItem(doc,"rtcDoc:defaultValue")
+        dataname = self.getKeyItem(doc,"rtcDoc:dataname")
+        return RTCConfData.Configuration_Doc(constraint,range,unit,description,defaultValue,dataname)
+
+    def setConfiguration_Properties(self, conf):
+        value = u""
+        name = u""
+        return RTCConfData.Configuration_Properties(value,name)
+
+    def setConfiguration(self, conf):
+        type = self.getKeyItem(conf,"xsi:type")
+        variableName = self.getKeyItem(conf,"rtcExt:variableName")
+        unit = self.getKeyItem(conf,"rtc:unit")
+        defaultValue = self.getKeyItem(conf,"rtc:defaultValue")
+        dataType = self.getKeyItem(conf,"rtc:type")
+        name = self.getKeyItem(conf,"rtc:name")
+        property = self.setConfiguration_Properties(conf)
+        doc = self.setConfiguration_Doc(conf.doc)
+
+        return RTCConfData.Configuration(type,variableName,unit,defaultValue,dataType,name,property,doc)
+
+    def setDataPort_Doc(self, doc):
+        operation = self.getKeyItem(doc,"rtcDoc:operation")
+        occerrence = self.getKeyItem(doc,"rtcDoc:occerrence")
+        unit = self.getKeyItem(doc,"rtcDoc:unit")
+        semantics = self.getKeyItem(doc,"rtcDoc:semantics")
+        number = self.getKeyItem(doc,"rtcDoc:number")
+        type = self.getKeyItem(doc,"rtcDoc:type")
+        description = self.getKeyItem(doc,"rtcDoc:description")
+        return RTCConfData.DataPort_Doc(operation,occerrence,unit,semantics,number,type,description)
+
+    def setDataPort(self, dp):
+        type = self.getKeyItem(dp,"xsi:type")
+        position = self.getKeyItem(dp,"rtcExt:position")
+        variableName = self.getKeyItem(dp,"rtcExt:variableName")
+        unit = self.getKeyItem(dp,"rtc:unit")
+        subscriptionType = self.getKeyItem(dp,"rtc:subscriptionType")
+        dataflowType = self.getKeyItem(dp,"rtc:dataflowType")
+        interfaceType = self.getKeyItem(dp,"rtc:interfaceType")
+        idlFile = self.getKeyItem(dp,"rtc:idlFile")
+        datatype = self.getKeyItem(dp,"rtc:type")
+        name = self.getKeyItem(dp,"rtc:name")
+        portType = self.getKeyItem(dp,"rtc:portType")
+        doc = self.setDataPort_Doc(dp.doc)
+
+        return RTCConfData.DataPort(type,position,variableName,unit,subscriptionType,dataflowType,interfaceType,idlFile,datatype,name,portType,doc)
+
+    def setServiceInterface_Doc(self, doc):
+        docPostCondition = self.getKeyItem(doc,"rtcDoc:docPostCondition")
+        docPreCondition = self.getKeyItem(doc,"rtcDoc:docPreCondition")
+        docException = self.getKeyItem(doc,"rtcDoc:docException")
+        docReturn = self.getKeyItem(doc,"rtcDoc:docReturn")
+        docArgument = self.getKeyItem(doc,"rtcDoc:docArgument")
+        description = self.getKeyItem(doc,"rtcDoc:description")
+
+        return RTCConfData.ServiceInterface_Doc(docPostCondition,docPreCondition,docException,docReturn,docArgument,description)
+
+    def setServiceInterface(self, interface):
+        type = self.getKeyItem(interface,"xsi:type")
+        variableName = self.getKeyItem(interface,"rtcExt:variableName")
+        path = self.getKeyItem(interface,"rtc:path")
+        interfeceType = self.getKeyItem(interface,"rtc:type")
+        idlFile = self.getKeyItem(interface,"rtc:idlFile")
+        instanceName = self.getKeyItem(interface,"rtc:instanceName")
+        direction = self.getKeyItem(interface,"rtc:direction")
+        name = self.getKeyItem(interface,"rtc:name")
+        
+        doc = self.setServiceInterface_Doc(interface.doc)
+
+        return RTCConfData.ServiceInterface(type,variableName,path,interfeceType,idlFile,instanceName,direction,name,doc)
+
+    def setServicePort_Doc(self, doc):
+        ifdescription = self.getKeyItem(doc,"rtcDoc:ifdescription")
+        description = self.getKeyItem(doc,"rtcDoc:description")
+        
+
+        return RTCConfData.ServicePort_Doc(ifdescription,description)
+
+    def setServicePort(self, sp):
+        type = self.getKeyItem(sp,"xsi:type")
+        position = self.getKeyItem(sp,"rtcExt:position")
+        name = self.getKeyItem(sp,"rtc:name")
+
+
+
+        interfaces = []
+        for i in sp.serviceInterfaces:
+            interfaces.append(self.setServiceInterface(i))
+
+        doc = self.setServicePort_Doc(sp.doc)
+
+        return RTCConfData.ServicePort(type,position,name,interfaces,doc)
+
+    def getFile(self, dirname, filename):
+        filename = searchFile(filename,os.path.join(self.compPath,dirname))
+        return filename
+    
+    def getProfile(self, name):
+        filename = searchFile("RTC.xml",os.path.join(self.compPath,name))
+        ans = True
+        if filename != "":
+            rp = RTCProfile(filename)
+        else:
+            rp = RTCProfile()
+            ans = False
+            
+        info = self.setBasicInfo(rp)
+        act = self.setActions(rp)
+        confs = []
+        if rp.configurationSet:
+            for c in rp.configurationSet.configurations:
+                confs.append(self.setConfiguration(c))
+        dports = []
+        for d in rp.getDataPorts():
+            dports.append(self.setDataPort(d))
+            
+        sports = []
+
+        for s in rp.serviceports:
+            sports.append(self.setServicePort(s))
+            
+        name = decodestr(name)
+        version = self.getKeyItem(rp,"rtc:version")
+        id = self.getKeyItem(rp,"rtc:id")
+        language = decodestr(rp.getLanguage())
+
+        return (ans, RTCConfData.RTC_Profile(name,version,id,language,info,act,confs,dports,sports))
+
+    def createComp(self, name):
+        return True
+
+    def removeComp(self, name):
+        return True
+
+    def getProfileList(self):
+        profileList = []
+        dirs = getDirList(self.compPath)
+        for d in dirs:
+            profile = self.getProfile(d)
+            if profile[0]:
+                profileList.append(profile[1])
+                
+        
+        return (True, profileList)
+
+    
+
+    def getKeyItem(self, obj, key):
+        
+        if key in obj.keys():
+            
+            return decodestr(obj[key])
+        return u""
+
+
+    
+
 class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     """
     @class ConfDataInterface_i
@@ -125,7 +375,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         self.exRTCList = []
 
-        
+        self.runRTCList = {}        
 
     def open(self, filename):
         self.rtcdCppFlag = True
@@ -151,6 +401,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
             f.close()
 
+        self.clean_RTCs()
+        self.open_RTCs(dirname[0])
 
         self.setConfData_Cpp(dirname[2]+"/rtc.conf")
         self.setConfData_Py(dirname[3]+"/rtc.conf")
@@ -421,7 +673,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             tbinfo = traceback.format_tb( info[2] )
             for tbi in tbinfo:
                 print tbi
-        
+
+
+        self.save_RTCs_rtcd_cpp(f,dirname[2])
         f.close()
 
 
@@ -448,9 +702,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             for tbi in tbinfo:
                 print tbi
 
+        self.save_RTCs_rtcd_py(f,dirname[3])
         f.close()
+        
+        
+        self.save_RTCs(dirname[0],os.path.relpath("../workspace",dirname[0]))
 
-                
         #sysFileName = dirname[0]+"/"+dirname[1].split(".")[0]+".rtsys"
         sysFileName = os.path.join(dirname[0],dirname[1].split(".")[0])+".rtsys"
         
@@ -630,6 +887,13 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 cmd = "cmd /c python startNamingService.py\n"
                 
             f.write(cmd)
+
+            if os.name == 'posix':
+                f.write("sh rtcStart_exe.sh\n")
+            elif os.name == 'nt':
+                f.write("cmd /c rtcStart_exe.bat\n")
+                
+            
             
             path = os.path.relpath("../workspace",home_dirname)
             if os.name == 'posix':
@@ -649,7 +913,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 cmd = "start " + path + " -f " + cpp_dirname + "/rtc.conf" + "\n"
             f.write(cmd)
 
-            path = "../Manager/Python/rtcd.py"
+            path = "../Manager/Python/rtcd_p.py"
             if os.name == 'posix':
                 path = path.replace("\\","/")
                 cmd = "python " + path + " -f " + py_dirname + "/rtc.conf" + "&\n"
@@ -659,13 +923,23 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
             f.write(cmd)
 
-            path = os.path.relpath(home_dirname,"../workspace")
+            """path = os.path.relpath(home_dirname,"../workspace")
             if os.name == 'posix':
                 path.replace("\\","/")
                 cmd = "cd " + path + "\n"
             elif os.name == 'nt':
                 path.replace("/","\\")
                 cmd = "cd " + path + "\n"
+            f.write(cmd)"""
+
+            
+
+            if os.name == 'posix':
+                cmd = "cd `dirname $0`" + "\n"
+            elif os.name == 'nt':
+                cmd = "cd /d %~dp0" + "\n"
+                    
+
             f.write(cmd)
 
             f.write("sleep 5\n")
@@ -751,6 +1025,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         for n in ManagerControl.confNameList:
                 p = self.getParam(n["name"],prop)
                 confList.append(RTCConfData.confData(n["name"],p))
+                
 
         return confList
 
@@ -903,12 +1178,15 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     def startRTCD_Cpp(self):
         if not self.rtcdCppFlag:
             return False
+        
+        
+        
         if self.rtcdControlprocess:
             self.rtcdControlprocess.kill()
             self.rtcdControlprocess = None
         
         f = open(self.cppDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_cpp, "", True)
+        self.saveData(f, self.confList_cpp, self.cppDirName, True)
         f.close()
 
         if os.name == 'posix':
@@ -946,7 +1224,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         connectServicePort(port.object, self.comp._rtcControl_cppPort.getPortRef(), portname)
 
         f = open(self.cppDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_cpp, "", True)
+        self.saveData(f, self.confList_cpp, self.cppDirName, True)
         f.close()
         
         return True
@@ -957,13 +1235,16 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     def startRTCD_Py(self):
         if not self.rtcdPyFlag:
             return False
+
+        
+        
         if self.rtcdControlPyprocess:
             self.rtcdControlPyprocess.kill()
             self.rtcdControlPyprocess = None
         #self.rtcdPyFlag = True
         #print self.pyDirName+"/rtc.conf"
         f = open(self.pyDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_py, "", True)
+        self.saveData(f, self.confList_py, self.pyDirName, True)
         f.close()
 
         if os.name == 'posix':
@@ -1002,7 +1283,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         connectServicePort(port.object, self.comp._rtcControl_pyPort.getPortRef(), portname)
 
         f = open(self.pyDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_py, "", True)
+        self.saveData(f, self.confList_py, self.pyDirName, True)
         f.close()
         
         return True
@@ -1040,7 +1321,17 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 
                     
             s += "\n"
+
+        
+            
             fd.write(s)
+
+        filename = os.path.join(filepath,"RTCs_rtcd.conf")
+        filename = os.path.relpath(filename)
+        if os.path.exists(filename):
+            filename = filename.replace("\\","/")
+            #print "manager.modules.loadRTCs: "+filename+"\n"
+            fd.write("manager.modules.loadRTCs: "+filename+"\n")
 
     # boolean exitRTCD()
     def exitRTCD_Cpp(self):
@@ -1247,7 +1538,23 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         wp = os.path.join(dname,"workspace")
         if not os.path.exists(wp):
-                os.mkdir(wp)
+            os.mkdir(wp)
+
+        cp = os.path.join(dname,"Components")
+        if not os.path.exists(cp):
+            os.mkdir(cp)
+
+        try:
+            ans, rtc_list = self.comp._rtcControl_cpp._ptr().getCompList()
+            self.copyRTComponentDir(rtc_list,cp)
+            ans, rtc_list = self.comp._rtcControl_py._ptr().getCompList()
+            self.copyRTComponentDir(rtc_list,cp)
+        except:
+            info = sys.exc_info()
+            tbinfo = traceback.format_tb( info[2] )
+            for tbi in tbinfo:
+                print tbi
+        
 
         if os.name == 'nt':
             omni_root = os.environ.get("OMNI_ROOT")
@@ -1285,7 +1592,387 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         #self.confList_cpp = []
         #self.confList_py = []
         return True
+
+    def copyRTComponentDir(self, rtc_list, dir):
+        for c in rtc_list:
+            if c.num != 0:
+                path1 = os.path.join("../Components",c.name)
+                path2 = os.path.join(dir,c.name)
+                if os.path.exists(path1):
+                    shutil.copytree(path1, path2)
+
+    def getProfile(self, name):
+        rp = RTComponentProfile()
+
+        return rp.getProfile(name)
+
+    """def getRTC_Num(self, lobj):
+        count = 0
+        while True:
+            if str(count) not in lobj:
+                return str(count)
+            count += 1"""
         
+    def updateCompList(self):
+        for k,v in self.runRTCList.items():
+            for c in v:
+                if c["type"] == 1:
+                    if c["process"].poll() != None:
+                        v.remove(c)
+
+    def getFilePath_dll(self, name):
+        rp = RTComponentProfile()
+        filename = name
+        if os.name == 'posix':
+            filename += ".so"
+        elif os.name == 'nt':
+            filename += ".dll"
+        filepath = rp.getFile(name, filename)
+        if filepath != "":
+            path = os.path.relpath(filepath)
+            dname = os.path.dirname(path)
+            return path,dname
+        return "",""
+
+    def getFilePath_exe(self, name):
+        rp = RTComponentProfile()
+        filename = name + "Comp"
+        if os.name == 'nt':
+            filename += ".exe"
+        filepath = rp.getFile(name, filename)
+        if filepath != "":
+            path = os.path.relpath(filepath)
+            dname = os.path.dirname(path)
+            bname = os.path.basename(path)
+            return path,dname,bname
+        return "","",""
+
+    def getFilePath_py(self, name):
+        rp = RTComponentProfile()
+        filename = name
+        filename += ".py"
+        filepath = rp.getFile(name, filename)
+        if filepath != "":
+            path = os.path.relpath(filepath)
+            dname = os.path.dirname(path)
+            bname = os.path.basename(path)
+            return path,dname,bname
+        return "","",""
+
+    def createComp(self, name, runtype):
+        self.updateCompList()
+        rp = RTComponentProfile()
+        ans,profile = rp.getProfile(name)
+        
+        if ans:
+            if runtype == 0:
+                if profile.language == u"C++":
+                    
+                    path,dname = self.getFilePath_dll(name)
+
+                    if path != "":
+                        #if len(self.comp._rtcControl_cppPort.get_connector_profiles()) > 0:
+                        try:
+                            ans = self.comp._rtcControl_cpp._ptr().createComp(name,dname)
+                        except:
+                            return False
+                            #ans = self._rtcControl_cpp._ptr().createComp("MyFirstComponent","..\\..\\..\\..\\Components\\MyFirstComponent\\src\\Release")
+                            
+                        if name not in self.runRTCList:
+                            self.runRTCList[name] = []
+                        #num = self.getRTC_Num(self.runRTCList[name])
+                        #self.runRTCList[name][num] = {"type":runtype,"language":profile.language}
+                        self.runRTCList[name].append({"type":runtype,"language":profile.language,"directory":dname})
+                                
+                        return True
+                        
+                    else:
+                        return False
+                elif profile.language == u"Python":
+                    
+                    path,dname,bname = self.getFilePath_py(name)
+
+                    if path != "":
+                        try:
+                            ans = self.comp._rtcControl_py._ptr().createComp(name,dname)
+                        except:
+                            return False
+
+                        if name not in self.runRTCList:
+                            self.runRTCList[name] = []
+                        #num = self.getRTC_Num(self.runRTCList[name])
+                        #self.runRTCList[name][num] = {"type":runtype,"language":profile.language}
+                        self.runRTCList[name].append({"type":runtype,"language":profile.language,"directory":dname})
+                                
+                        return True
+
+                    else:
+                        return False
+            else:
+                if name in self.runRTCList:
+                    if len(self.runRTCList) > 0:
+                        
+                        return False
+                    
+                if profile.language == u"C++":
+                    
+                    path,dname,bname = self.getFilePath_exe(name)
+
+                    if path != "":
+                        com = bname
+
+                        if os.name == 'posix':
+                            com = com.split(" ")
+                        
+                        cwd = os.getcwd()
+                        os.chdir(dname)
+                        
+                        sp = subprocess.Popen(com, stdout=subprocess.PIPE)
+                        os.chdir(cwd)
+                        
+                        if name not in self.runRTCList:
+                            
+                            self.runRTCList[name] = []
+                            
+                        #num = self.getRTC_Num(self.runRTCList[name])
+                        
+                        #self.runRTCList[name][num] = {"type":runtype,"process":sp,"language":profile.language}
+                        self.runRTCList[name].append({"type":runtype,"process":sp,"language":profile.language,"directory":dname,"filename":bname})
+                            
+                        return True
+                    else:
+                        return False
+                    
+                elif profile.language == u"Python":
+                    path,dname,bname = self.getFilePath_py(name)
+
+                    if path != "":
+                        com = "python " + bname
+                        if os.name == 'posix':
+                            com = com.split(" ")
+                        
+                        cwd = os.getcwd()
+                        os.chdir(dname)
+                        sp = subprocess.Popen(com, stdout=subprocess.PIPE)
+                        os.chdir(cwd)
+
+                        if name not in self.runRTCList:
+                            self.runRTCList[name] = []
+                        #num = self.getRTC_Num(self.runRTCList[name])
+                        #self.runRTCList[name][num] = {"type":runtype,"process":sp,"language":profile.language}
+                        self.runRTCList[name].append({"type":runtype,"process":sp,"language":profile.language,"directory":dname,"filename":bname})
+                        return True
+                    else:
+                        return False
+                    
+                
+        return False
+
+    def removeComp(self, name):
+        """self.updateCompList()
+        if name in self.runRTCList:
+            
+            if id in self.runRTCList[name]:
+                
+                if id in self.runRTCList[name]:
+                    
+                    if self.runRTCList[name][id]["type"] == 0:
+                        ans = False
+                        language = self.runRTCList[name][id]["language"]
+                        if language == u"C++":
+                            if len(self.comp._rtcControl_cppPort.get_connector_profiles()) > 0:
+                                ans = self.comp._rtcControl_cpp._ptr().removeComp(name)
+                        elif language == u"Python":
+                            if len(self.comp._rtcControl_pyPort.get_connector_profiles()) > 0:
+                                ans = self.comp._rtcControl_py._ptr().removeComp(name)
+                                
+                        if ans:
+                            del self.runRTCList[name][id]
+                            return True
+                    else:
+                        
+                        self.runRTCList[name][id]["process"].kill()
+                        
+                        del self.runRTCList[name][id]
+                        return True
+        """            
+        return False
+
+    def getProfileList(self):
+        
+        rp = RTComponentProfile()
+        
+        return rp.getProfileList()
+
+    def saveRTCsData(self, filename, rtc_list, mode):
+        
+        f = open(filename, "wb")
+        
+        r = len(rtc_list)
+        d = struct.pack("i", r)
+        f.write(d)
+        
+        for c in rtc_list:
+            
+            WriteString(c["name"],f)
+            d = struct.pack("i", c["num"])
+            
+            f.write(d)
+            if mode == 0:
+                WriteString(c["path"],f)
+                
+                WriteString(c["directory"],f)
+                
+                
+            
+            
+            
+        
+        f.close()
+
+    def save_RTCs_rtcd_cpp(self, confFile, path):
+        try:
+            
+            ans, rtc_list = self.comp._rtcControl_cpp._ptr().getCompList()
+            c_list = []
+            
+            for c in rtc_list:
+                if c.num != 0:
+                    fname,dname = self.getFilePath_dll(c.name)
+                    c_list.append({"name":c.name,"num":c.num,"language":"C++","path":fname,"directory":dname})
+                
+            filename = os.path.join(path,"RTCs_rtcd.conf")
+            
+            filename = filename.replace("\\","/")
+            
+                
+            confFile.write("manager.modules.loadRTCs: "+filename+"\n")
+
+            self.saveRTCsData(filename, c_list, 0)
+            
+        except:
+            info = sys.exc_info()
+            tbinfo = traceback.format_tb( info[2] )
+            for tbi in tbinfo:
+                print tbi
+                
+    def save_RTCs_rtcd_py(self, confFile, path):
+        try:
+            ans, rtc_list = self.comp._rtcControl_py._ptr().getCompList()
+            
+            c_list = []
+            
+            for c in rtc_list:
+                if c.num != 0:
+                    fname,dname,bname = self.getFilePath_py(c.name)
+                    c_list.append({"name":c.name,"num":c.num,"language":"Python","path":fname,"directory":dname})
+
+            filename = os.path.join(path,"RTCs_rtcd.conf")
+            
+            filename = filename.replace("\\","/")
+            
+                
+            confFile.write("manager.modules.loadRTCs: "+filename+"\n")
+            
+            self.saveRTCsData(filename, c_list, 0)
+        except:
+            info = sys.exc_info()
+            tbinfo = traceback.format_tb( info[2] )
+            for tbi in tbinfo:
+                print tbi
+                
+    def open_RTCs(self, path):
+        filename = os.path.join(path,"RTCs.conf")
+        
+        if os.path.exists(filename):
+            f = open(filename, 'rb')
+            m = struct.unpack("i",f.read(4))[0]
+            for i in range(0,m):
+                name = ReadString(f).replace("\0","")
+                num = struct.unpack("i",f.read(4))[0]
+                for n in range(0,num):
+                    self.createComp(name, 1)
+            f.close()
+
+    def clean_RTCs(self):
+        for k,v in self.runRTCList.items():
+            for c in v:
+                if c["type"] == 0:
+                    pass
+                else:
+                    c["process"].kill()
+        self.runRTCList = {}
+        
+    def save_RTCs(self, path, workspace):
+        
+        rtc_list = []
+        batfile = os.path.join(path, "rtcStart_exe")
+        if os.name == 'posix':
+            f = open(batfile+".sh", 'w')
+            
+        elif os.name == 'nt':
+            f = open(batfile+".bat", 'w')
+            
+        self.writeFileOption(f)
+
+        
+
+        if os.name == 'posix':
+            workspace = workspace.replace("\\","/")
+        elif os.name == 'nt':
+            workspace = workspace.replace("/","\\")
+                
+               
+        cmd = "cd " + workspace + "\n"
+        f.write(cmd)
+        
+        #print self.runRTCList
+        for k,v in self.runRTCList.items():
+            if len(v) != 0:
+                if v[0]["type"] != 0:
+                    data = {"name":k,"num":len(v)}
+                    
+                    rtc_list.append(data)
+
+                    if os.name == 'posix':
+                        cmd = "cd " + v[0]["directory"].replace("\\","/") + "\n"
+                    elif os.name == 'nt':
+                        cmd = "cd " + v[0]["directory"].replace("/","\\") + "\n"
+
+                    f.write(cmd)
+
+                    cmd_sub = ""
+                    if v[0]["language"] == u"Python":
+                        cmd_sub = "python "
+
+                    if os.name == 'posix':
+                        cmd = "start " + cmd_sub + v[0]["filename"] + "\n"
+                    elif os.name == 'nt':
+                        cmd = "start " + cmd_sub + v[0]["filename"] + "\n"
+
+                    f.write(cmd)
+
+                    if os.name == 'posix':
+                        cmd = "cd `dirname $0`" + "\n"
+                    elif os.name == 'nt':
+                        cmd = "cd /d %~dp0" + "\n"
+                    
+
+                    f.write(cmd)
+
+                    cmd = "cd " + workspace + "\n"
+                    f.write(cmd)
+                
+            #data = rtcControl.RTC_Data(k, len(v))
+            #rtc_list.append(data)
+
+        if len(rtc_list) == 0:
+            if os.name == 'nt':
+                f.write("rem\n")
+                
+        f.close()
+        
+        self.saveRTCsData(os.path.join(path,"RTCs.conf"), rtc_list, 1)
 
 # </rtc-template>
 
@@ -1337,6 +2024,12 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 		"""
 		self._rtcconf = ConfDataInterface_i(self)
 		
+		#self._rtcconf.createComp("MySecondComponent",1)
+
+		#print self._rtcconf.getProfileList()
+		#print self._rtcconf.getProfile("MyFirstComponent")
+
+        
 
 		"""
 		"""
@@ -1435,7 +2128,24 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 		#
 		#
 	def onActivated(self, ec_id):
-	
+                try:
+                    pass
+                    #self._rtcconf.open_RTCs(".")
+                    #self._rtcconf.createComp("MySecondComponent",0)
+                    #self._rtcconf.createComp("MySecondComponent",0)
+                    #self._rtcconf.createComp("MySecondComponent",0)
+                    
+                except:
+                    info = sys.exc_info()
+                    tbinfo = traceback.format_tb( info[2] )
+                    for tbi in tbinfo:
+                        print tbi
+                #self._rtcconf.createComp("MySecondComponent",1)
+                #self._rtcconf.createComp("MySecondComponent",1)
+                
+                #print self._rtcControl_cpp._ptr().createComp("MyFirstComponent","..\\..\\..\\..\\Components\\MyFirstComponent\\src\\Release")
+                #print self._rtcControl_py._ptr().createComp("MySecondComponent","..\\Components\\MySecondComponent")
+                
 		return RTC.RTC_OK
 	
 		##
@@ -1449,7 +2159,28 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 		#
 		#
 	def onDeactivated(self, ec_id):
-	
+                try:
+                    pass
+                    #print self._rtcControl_py._ptr().getCompList()
+                    #self._rtcconf.save_RTCs(None,".")
+                    #self._rtcconf.save_RTCs(".",".")
+                    #self._rtcconf.clean_RTCs()
+                    #f = open("test2.conf", "w")
+                    #self._rtcconf.save_RTCs_rtcd_py(f,".")
+                    #f.close()
+                except:
+                    info = sys.exc_info()
+                    tbinfo = traceback.format_tb( info[2] )
+                    for tbi in tbinfo:
+                        print tbi
+                #self._rtcconf.updateCompList()
+                #print  self._rtcconf.runRTCList
+                #self._rtcconf.removeComp("MySecondComponent","2")
+                #print self._rtcconf.runRTCList
+                #print self._rtcControl_py._ptr().getCompList()
+                #print self._rtcControl_cpp._ptr().removeComp("MyFirstComponent")
+                #print self._rtcControl_py._ptr().removeComp("MySecondComponent")
+                #print self._rtcControl_py._ptr().getCompList()
 		return RTC.RTC_OK
 	
 		##
@@ -1465,6 +2196,8 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 	def onExecute(self, ec_id):
 
         	
+                #print len(self._rtcControl_pyPort.get_connector_profiles())
+
         
         
         

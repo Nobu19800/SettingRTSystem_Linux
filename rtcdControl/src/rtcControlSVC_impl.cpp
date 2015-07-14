@@ -5,7 +5,11 @@
  *
  */
 
+#include <coil/stringutil.h>
 #include "rtcControlSVC_impl.h"
+
+
+
 
 /*
  * Example implementational code for IDL interface rtcControl::RTCDataInterface
@@ -13,6 +17,8 @@
 RTCDataInterfaceSVC_impl::RTCDataInterfaceSVC_impl(RTC::Manager* manager)
 {
 	mgr = manager;
+	loadRTCsObject = new LoadRTCs(manager);
+	loadRTCsObject->openFile();
   // Please add extra constructor code here.
 }
 
@@ -56,8 +62,19 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::getRTC(rtcControl::rtcPathSeq_out paths
   return 0;
 }
 
+
+
+
+
+
+
 CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* filename, const char* filepath)
 {
+	
+	
+	return loadRTCsObject->createComp(filename,filepath);
+	
+	
   // Please insert your code here and remove the following warning pragma
 #ifndef WIN32
   #warning "Code missing in function <CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* filename, const char* filepath)>"
@@ -65,8 +82,10 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* filename, const 
   return 0;
 }
 
-CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* name)
+CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* filename)
 {
+	return loadRTCsObject->removeComp(filename);
+	
   // Please insert your code here and remove the following warning pragma
 #ifndef WIN32
   #warning "Code missing in function <CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* name)>"
@@ -74,6 +93,43 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* name)
   return 0;
 }
 
+
+CORBA::Boolean RTCDataInterfaceSVC_impl::getCompList(rtcControl::RTC_List_out names)
+{
+
+	
+	loadRTCsObject->updateCompList();
+
+	rtcControl::RTC_List_var paths_var = new rtcControl::RTC_List;
+
+	int size = 0;
+	for(int i=0;i < loadRTCsObject->compList.size();i++)
+	{
+		if(loadRTCsObject->compList[i].m_compList.size() > 0)
+			size += 1;
+	}
+	
+	paths_var->length(size);
+
+	for(int i=0;i < loadRTCsObject->compList.size();i++)
+	{
+		if(loadRTCsObject->compList[i].m_compList.size() > 0)
+		{
+			paths_var[i].name = loadRTCsObject->compList[i].m_filename.c_str();
+			paths_var[i].num = loadRTCsObject->compList[i].m_compList.size();
+		}
+		
+		
+	}
+	
+	names = paths_var._retn();
+
+	return true;
+#ifndef WIN32
+  #warning "Code missing in function <CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* name)>"
+#endif
+  return 0;
+}
 
 
 // End of example implementational code

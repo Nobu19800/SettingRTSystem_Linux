@@ -52,6 +52,8 @@ rtcdControl::~rtcdControl()
 
 
 
+
+
 RTC::ReturnCode_t rtcdControl::onInitialize()
 {
   // Registration: InPort/OutPort/Service

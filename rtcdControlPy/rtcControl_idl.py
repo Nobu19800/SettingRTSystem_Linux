@@ -31,6 +31,33 @@ _0_rtcControl._tc_rtcPathSeq = omniORB.tcInternal.createTypeCode(_0_rtcControl._
 omniORB.registerType(rtcPathSeq._NP_RepositoryId, _0_rtcControl._ad_rtcPathSeq, _0_rtcControl._tc_rtcPathSeq)
 del rtcPathSeq
 
+# struct RTC_Data
+_0_rtcControl.RTC_Data = omniORB.newEmptyClass()
+class RTC_Data (omniORB.StructBase):
+    _NP_RepositoryId = "IDL:rtcControl/RTC_Data:1.0"
+
+    def __init__(self, name, num):
+        self.name = name
+        self.num = num
+
+_0_rtcControl.RTC_Data = RTC_Data
+_0_rtcControl._d_RTC_Data  = (omniORB.tcInternal.tv_struct, RTC_Data, RTC_Data._NP_RepositoryId, "RTC_Data", "name", (omniORB.tcInternal.tv_string,0), "num", omniORB.tcInternal.tv_short)
+_0_rtcControl._tc_RTC_Data = omniORB.tcInternal.createTypeCode(_0_rtcControl._d_RTC_Data)
+omniORB.registerType(RTC_Data._NP_RepositoryId, _0_rtcControl._d_RTC_Data, _0_rtcControl._tc_RTC_Data)
+del RTC_Data
+
+# typedef ... RTC_List
+class RTC_List:
+    _NP_RepositoryId = "IDL:rtcControl/RTC_List:1.0"
+    def __init__(self, *args, **kw):
+        raise RuntimeError("Cannot construct objects of this type.")
+_0_rtcControl.RTC_List = RTC_List
+_0_rtcControl._d_RTC_List  = (omniORB.tcInternal.tv_sequence, omniORB.typeMapping["IDL:rtcControl/RTC_Data:1.0"], 0)
+_0_rtcControl._ad_RTC_List = (omniORB.tcInternal.tv_alias, RTC_List._NP_RepositoryId, "RTC_List", (omniORB.tcInternal.tv_sequence, omniORB.typeMapping["IDL:rtcControl/RTC_Data:1.0"], 0))
+_0_rtcControl._tc_RTC_List = omniORB.tcInternal.createTypeCode(_0_rtcControl._ad_RTC_List)
+omniORB.registerType(RTC_List._NP_RepositoryId, _0_rtcControl._ad_RTC_List, _0_rtcControl._tc_RTC_List)
+del RTC_List
+
 # interface RTCDataInterface
 _0_rtcControl._d_RTCDataInterface = (omniORB.tcInternal.tv_objref, "IDL:rtcControl/RTCDataInterface:1.0", "RTCDataInterface")
 omniORB.typeMapping["IDL:rtcControl/RTCDataInterface:1.0"] = _0_rtcControl._d_RTCDataInterface
@@ -52,6 +79,7 @@ omniORB.registerType(RTCDataInterface._NP_RepositoryId, _0_rtcControl._d_RTCData
 RTCDataInterface._d_getRTC = ((), (omniORB.tcInternal.tv_boolean, omniORB.typeMapping["IDL:rtcControl/rtcPathSeq:1.0"]), None)
 RTCDataInterface._d_createComp = (((omniORB.tcInternal.tv_string,0), (omniORB.tcInternal.tv_string,0)), (omniORB.tcInternal.tv_boolean, ), None)
 RTCDataInterface._d_removeComp = (((omniORB.tcInternal.tv_string,0), ), (omniORB.tcInternal.tv_boolean, ), None)
+RTCDataInterface._d_getCompList = ((), (omniORB.tcInternal.tv_boolean, omniORB.typeMapping["IDL:rtcControl/RTC_List:1.0"]), None)
 
 # RTCDataInterface object reference
 class _objref_RTCDataInterface (CORBA.Object):
@@ -69,7 +97,10 @@ class _objref_RTCDataInterface (CORBA.Object):
     def removeComp(self, *args):
         return _omnipy.invoke(self, "removeComp", _0_rtcControl.RTCDataInterface._d_removeComp, args)
 
-    __methods__ = ["getRTC", "createComp", "removeComp"] + CORBA.Object.__methods__
+    def getCompList(self, *args):
+        return _omnipy.invoke(self, "getCompList", _0_rtcControl.RTCDataInterface._d_getCompList, args)
+
+    __methods__ = ["getRTC", "createComp", "removeComp", "getCompList"] + CORBA.Object.__methods__
 
 omniORB.registerObjref(RTCDataInterface._NP_RepositoryId, _objref_RTCDataInterface)
 _0_rtcControl._objref_RTCDataInterface = _objref_RTCDataInterface
@@ -81,7 +112,7 @@ class RTCDataInterface (PortableServer.Servant):
     _NP_RepositoryId = _0_rtcControl.RTCDataInterface._NP_RepositoryId
 
 
-    _omni_op_d = {"getRTC": _0_rtcControl.RTCDataInterface._d_getRTC, "createComp": _0_rtcControl.RTCDataInterface._d_createComp, "removeComp": _0_rtcControl.RTCDataInterface._d_removeComp}
+    _omni_op_d = {"getRTC": _0_rtcControl.RTCDataInterface._d_getRTC, "createComp": _0_rtcControl.RTCDataInterface._d_createComp, "removeComp": _0_rtcControl.RTCDataInterface._d_removeComp, "getCompList": _0_rtcControl.RTCDataInterface._d_getCompList}
 
 RTCDataInterface._omni_skeleton = RTCDataInterface
 _0_rtcControl__POA.RTCDataInterface = RTCDataInterface

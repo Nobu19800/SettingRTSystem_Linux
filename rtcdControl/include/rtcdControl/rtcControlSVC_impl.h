@@ -5,6 +5,7 @@
  *
  */
 
+#include <rtm/DataFlowComponentBase.h>
 #include "BasicDataTypeSkel.h"
 
 #include "rtcControlSkel.h"
@@ -13,8 +14,14 @@
 #define RTCCONTROLSVC_IMPL_H
 
 #include <rtm/Manager.h>
-#include <rtm/DataFlowComponentBase.h>
+
+#include "LoadRTCs.h"
  
+
+
+
+
+
 /*!
  * @class RTCDataInterfaceSVC_impl
  * Example class implementing IDL interface rtcControl::RTCDataInterface
@@ -41,9 +48,12 @@ class RTCDataInterfaceSVC_impl
    // attributes and operations
    CORBA::Boolean getRTC(rtcControl::rtcPathSeq_out paths);
    CORBA::Boolean createComp(const char* filename, const char* filepath);
-   CORBA::Boolean removeComp(const char* name);
+   CORBA::Boolean removeComp(const char* filename);
+   CORBA::Boolean getCompList(rtcControl::RTC_List_out names);
+   
 
 private:
+	LoadRTCs *loadRTCsObject;
 	RTC::Manager* mgr;
 
 };
