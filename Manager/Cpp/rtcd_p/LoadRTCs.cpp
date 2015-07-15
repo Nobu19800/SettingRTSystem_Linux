@@ -46,8 +46,6 @@ void LoadRTCs::openFile()
 		return;
 	}
 
-	
-
 #ifdef _WINDOWS
 	coil::replaceString(value, "/", "\\");
 #else
@@ -98,7 +96,7 @@ RTCInitFunction LoadRTCs::getFunc(std::string filename,std::string filepath)
 
 #else
 	coil::replaceString(filepath, "\\", "/");
-	std::string fn = filename + ".so";
+	std::string fn = filepath + "/" + filename + ".so";
 
 #endif
 
@@ -171,13 +169,11 @@ bool LoadRTCs::createComp(const char* filename, const char* filepath)
 
 	if(preLoadComp == NULL)
 	{
-		
 		InInitFunc = getFunc(filename, filepath);
 		if(InInitFunc == NULL)
 		{
 			return false;
 		}
-		
 		InInitFunc(mgr);
 	}
 
@@ -185,7 +181,6 @@ bool LoadRTCs::createComp(const char* filename, const char* filepath)
 	{
 		
 		RTC::RtcBase *comp = mgr->createComponent(filename);
-		
 		if(!comp)
 			return false;
 		

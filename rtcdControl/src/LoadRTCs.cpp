@@ -96,7 +96,7 @@ RTCInitFunction LoadRTCs::getFunc(std::string filename,std::string filepath)
 
 #else
 	coil::replaceString(filepath, "\\", "/");
-	std::string fn = filename + ".so";
+	std::string fn = filepath + "/" + filename + ".so";
 
 #endif
 

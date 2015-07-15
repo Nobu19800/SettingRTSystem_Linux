@@ -905,9 +905,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             cmd = "cd " + path + "\n"
             f.write(cmd)
 
+            
             if os.name == 'posix':
-                #path = "rtcd".replace("\\","/")
-                cmd = "rtcd" + " -f " + cpp_dirname + "/rtc.conf" + "&\n"
+                path = "../Manager/Cpp/rtcd_p/rtcd_p".replace("\\","/")
+                cmd = path + " -f " + cpp_dirname + "/rtc.conf" + "&\n"
+                #cmd = "rtcd" + " -f " + cpp_dirname + "/rtc.conf" + "&\n"
             elif os.name == 'nt':
                 path = "../Manager/Cpp/rtcd_p/Release/rtcd_p.exe".replace("/","\\")
                 cmd = "start " + path + " -f " + cpp_dirname + "/rtc.conf" + "\n"
