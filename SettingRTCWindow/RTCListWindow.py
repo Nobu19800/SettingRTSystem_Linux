@@ -1149,6 +1149,31 @@ def encodestr(s):
 class RTC_Window(QtGui.QWidget):
     def __init__(self, parent=None):
         super(RTC_Window, self).__init__(parent)
+        self.tab_widget = QtGui.QTabWidget(self)
+        self.mainLayout = QtGui.QVBoxLayout()
+        self.setLayout(self.mainLayout)
+        self.mainLayout.addWidget(self.tab_widget)
+        self.parent = parent
+        self.tab_list = {}
+    def loadList(self, data):
+        category_List = {}
+        for i in range(len(data)):
+            category_name = data[i].info.category
+            if category_name not in category_List:
+                category_List[category_name] = []
+            category_List[category_name].append(data[i])
+
+        for k,v in category_List.items():
+            cw = Category_Window(self)
+            cw.loadList(v)
+            self.tab_list[k] = cw
+            self.tab_widget.addTab(cw,k)
+            
+            
+
+class Category_Window(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(Category_Window, self).__init__(parent)
         self.parent = parent
         self.mainLayout = QtGui.QVBoxLayout()
         self.setLayout(self.mainLayout)
@@ -1164,15 +1189,11 @@ class RTC_Window(QtGui.QWidget):
             if i%3 == 0:
                 self.layouts.append(QtGui.QHBoxLayout())
                 self.mainLayout.addLayout(self.layouts[-1])
-            self.items[data[i].name] = RTCItem(data[i],self.parent,data[i].name)
+            self.items[data[i].name] = RTCItem(data[i],self.parent.parent,data[i].name)
             self.layouts[-1].addWidget(self.items[data[i].name])
             
             
-    def mesBox(self, mes):
-        msgbox = QtGui.QMessageBox( self )
-        msgbox.setText( mes )
-        msgbox.setModal( True )
-        ret = msgbox.exec_()
+    
 
 class ScrollArea(QtGui.QScrollArea):
     def __init__(self, parent=None):
