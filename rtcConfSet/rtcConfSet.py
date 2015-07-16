@@ -645,6 +645,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         
         f = open(dirname[2]+"/rtc.conf", 'w')
+        self.save_RTCs_rtcd_cpp(dirname[2])
         self.saveData(f, self.confList_cpp, dirname[2], False, compositeRTCList["C++"])
         
 
@@ -675,11 +676,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 print tbi
 
 
-        self.save_RTCs_rtcd_cpp(f,dirname[2])
+        
         f.close()
 
 
         f = open(dirname[3]+"/rtc.conf", 'w')
+        self.save_RTCs_rtcd_py(dirname[3])
         self.saveData(f, self.confList_py, dirname[3], False, compositeRTCList["Python"])
 
         py_path = None
@@ -702,7 +704,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             for tbi in tbinfo:
                 print tbi
 
-        self.save_RTCs_rtcd_py(f,dirname[3])
+        
         f.close()
         
         
@@ -1330,8 +1332,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         filename = os.path.join(filepath,"RTCs_rtcd.conf")
         filename = os.path.relpath(filename)
+        
         if os.path.exists(filename):
             filename = filename.replace("\\","/")
+            
             #print "manager.modules.loadRTCs: "+filename+"\n"
             fd.write("manager.modules.loadRTCs: "+filename+"\n")
 
@@ -1832,7 +1836,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         f.close()
 
-    def save_RTCs_rtcd_cpp(self, confFile, path):
+    def save_RTCs_rtcd_cpp(self, path):
         try:
             
             ans, rtc_list = self.comp._rtcControl_cpp._ptr().getCompList()
@@ -1847,8 +1851,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
             filename = filename.replace("\\","/")
             
-                
-            confFile.write("manager.modules.loadRTCs: "+filename+"\n")
+             
+            #confFile.write("manager.modules.loadRTCs: "+filename+"\n")
 
             self.saveRTCsData(filename, c_list, 0)
             
@@ -1858,7 +1862,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             for tbi in tbinfo:
                 print tbi
                 
-    def save_RTCs_rtcd_py(self, confFile, path):
+    def save_RTCs_rtcd_py(self, path):
         try:
             ans, rtc_list = self.comp._rtcControl_py._ptr().getCompList()
             
@@ -1874,7 +1878,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             filename = filename.replace("\\","/")
             
                 
-            confFile.write("manager.modules.loadRTCs: "+filename+"\n")
+            #confFile.write("manager.modules.loadRTCs: "+filename+"\n")
             
             self.saveRTCsData(filename, c_list, 0)
         except:
