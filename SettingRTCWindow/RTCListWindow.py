@@ -699,12 +699,12 @@ class RenderRTC(RenderPath):
         #print self.parentWidget()
 
         self.rtc_defsize_x = 50
-        self.rtc_defsize_y = 70
+        self.rtc_defsize_y = 60
         #self.rtc_defsize_y = 60
-        self.rtc_defpos_x = 30
-        self.rtc_defpos_y = 15
+        self.rtc_defpos_x = 25
+        self.rtc_defpos_y = 20
 
-        self.maxSize_port = self.rtc_defsize_y*0.4
+        #self.maxSize_port = self.rtc_defsize_y*0.33
         #self.minSize_x = 30
         #self.minSize_y = 20
 
@@ -794,7 +794,7 @@ class RenderRTC(RenderPath):
 
     def addPort(self):
         
-        size = self.calcPortSize()
+        size,count_d = self.calcPortSize()
 
         tmp = self.serviceports[:]
         tmp.extend(self.dataports)
@@ -803,20 +803,20 @@ class RenderRTC(RenderPath):
 
         
 
-        count = [0.5,0.5,0.5,0.5]
+        count = [0,0,0,0]
 
-        
+        offxsize = (self.rtc_defsize_x - size*float(count_d))/(float(count_d)+1.0)
 
         for dp in tmp:
 
             if dp.position == Port.LEFT:
-                dp.setPosition(self.rtc_defpos_x,self.rtc_defpos_y+size*2.5*(count[dp.position]-0.2))
+                dp.setPosition(self.rtc_defpos_x,self.rtc_defpos_y+size*2.0*(float(count[dp.position])+0.5))
             elif dp.position == Port.RIGHT:
-                dp.setPosition(self.rtc_defpos_x+self.rtc_defsize_x,self.rtc_defpos_y+size*2.5*(count[dp.position]-0.2))
+                dp.setPosition(self.rtc_defpos_x+self.rtc_defsize_x,self.rtc_defpos_y+size*2.0*(float(count[dp.position])+0.5))
             elif dp.position == Port.TOP:
-                dp.setPosition(self.rtc_defpos_x+size*2.5*(count[dp.position]),self.rtc_defpos_y)
+                dp.setPosition(self.rtc_defpos_x+size*float(count[dp.position])+offxsize*float(count[dp.position]+1),self.rtc_defpos_y)
             elif dp.position == Port.BOTTOM:
-                dp.setPosition(self.rtc_defpos_x+size*2.5*(count[dp.position]),self.rtc_defpos_y+self.rtc_defsize_y)
+                dp.setPosition(self.rtc_defpos_x+size*float(count[dp.position])+offxsize*float(count[dp.position]+1),self.rtc_defpos_y+self.rtc_defsize_y)
             count[dp.position] += 1
             dp.setSize(size)
 
@@ -853,13 +853,14 @@ class RenderRTC(RenderPath):
 
         if count == 0:
             count = 1
-            
-        return self.maxSize_port/count
+
+        return self.rtc_defsize_y/(1.0+float(count*2)),count
+        #return self.maxSize_port/count
         
     def addServicePort(self, profile):
         
         
-        size = self.calcPortSize()
+        size,count = self.calcPortSize()
         
         dp = ServicePort(profile,size,self.scene(),self)
 
@@ -884,7 +885,7 @@ class RenderRTC(RenderPath):
 
     def addDataPort(self, profile):
         
-        size = self.calcPortSize()
+        size,count = self.calcPortSize()
         
         dp = DataPort(profile,size,self.scene(),self)
 
@@ -1054,6 +1055,8 @@ class ViewWindow(QtGui.QDialog):
         self.view = QtGui.QGraphicsView(self.scene)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)
         self.view.setBackgroundBrush(QtGui.QColor(230, 200, 167))
+        
+        
         self.mainLayout.addWidget(self.view)
         self.renderWindow = RenderRTC(profile, self.scene)
 
