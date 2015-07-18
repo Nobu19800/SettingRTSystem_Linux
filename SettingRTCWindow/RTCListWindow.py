@@ -810,13 +810,13 @@ class RenderRTC(RenderPath):
         for dp in tmp:
 
             if dp.position == Port.LEFT:
-                dp.setPosition(self.rtc_defpos_x,self.rtc_defpos_y+size*1.5*count[dp.position])
+                dp.setPosition(self.rtc_defpos_x,self.rtc_defpos_y+size*2.5*(count[dp.position]-0.2))
             elif dp.position == Port.RIGHT:
-                dp.setPosition(self.rtc_defpos_x+self.rtc_defsize_x,self.rtc_defpos_y+size*1.5*count[dp.position])
+                dp.setPosition(self.rtc_defpos_x+self.rtc_defsize_x,self.rtc_defpos_y+size*2.5*(count[dp.position]-0.2))
             elif dp.position == Port.TOP:
-                dp.setPosition(self.rtc_defpos_x+size*1.5*count[dp.position],self.rtc_defpos_y)
+                dp.setPosition(self.rtc_defpos_x+size*2.5*(count[dp.position]),self.rtc_defpos_y)
             elif dp.position == Port.BOTTOM:
-                dp.setPosition(self.rtc_defpos_x+size*1.5*count[dp.position],self.rtc_defpos_y+self.rtc_defsize_y)
+                dp.setPosition(self.rtc_defpos_x+size*2.5*(count[dp.position]),self.rtc_defpos_y+self.rtc_defsize_y)
             count[dp.position] += 1
             dp.setSize(size)
 
@@ -1061,8 +1061,8 @@ class ViewWindow(QtGui.QDialog):
         addLineEditBox(u"名前",profile.name,self.mainLayout)
         addLineEditBox(u"バージョン",profile.version,self.mainLayout)
         addLineEditBox(u"言語",profile.language,self.mainLayout)
-        addLineEditBox(u"モジュール概要",profile.info.abstracts,self.mainLayout)
-        addTextEditBox(u"概要",profile.info.description,self.mainLayout)
+        addLineEditBox(u"モジュール概要",profile.info.description,self.mainLayout)
+        addTextEditBox(u"概要",profile.info.abstracts,self.mainLayout)
         
         self.showConfigurationButton = QtGui.QPushButton(u"コンフィギュレーションパラメータ表示")
         self.showConfigurationButton.clicked.connect(self.showConfigurationSlot)
@@ -1189,8 +1189,12 @@ class Category_Window(QtGui.QWidget):
             if i%3 == 0:
                 self.layouts.append(QtGui.QHBoxLayout())
                 self.mainLayout.addLayout(self.layouts[-1])
+                
             self.items[data[i].name] = RTCItem(data[i],self.parent.parent,data[i].name)
             self.layouts[-1].addWidget(self.items[data[i].name])
+        if len(self.layouts) > 0:
+            self.layouts[-1].addStretch(0)
+        self.mainLayout.addStretch(0)
             
             
     
