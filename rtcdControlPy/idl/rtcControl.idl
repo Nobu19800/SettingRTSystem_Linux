@@ -12,6 +12,7 @@ module rtcControl {
 
 	struct RTC_Data {
 		string name;
+		string filename;
 		short num;
 	};
 
@@ -19,8 +20,8 @@ module rtcControl {
 
 	interface RTCDataInterface {
 		boolean getRTC(out rtcPathSeq paths);
-		boolean createComp(in string filename, in string filepath);
-		boolean removeComp(in string filename);
+		boolean createComp(in string name, in string filename, in string filepath);
+		boolean removeComp(in string name);
 		boolean getCompList(out RTC_List names);
 	};
 

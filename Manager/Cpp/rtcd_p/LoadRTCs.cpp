@@ -13,8 +13,9 @@ using namespace std;
 
 
 
-compParam::compParam(std::string filename, std::string filepath, RTCInitFunction func, std::vector<RTC::RtcBase *> compList)
+compParam::compParam(std::string name, std::string filename, std::string filepath, RTCInitFunction func, std::vector<RTC::RtcBase *> compList)
 {
+	m_name = name;
 	m_filename = filename;
 	m_filepath = filepath;
 	m_func = func;
@@ -61,6 +62,8 @@ void LoadRTCs::openFile()
 	{
 		string name;
 		name = ReadString( ifs );
+		string filename;
+		filename = ReadString( ifs );
 		int d;
 		ifs.read( (char*)&d, sizeof(d) );
 		string path;
@@ -70,7 +73,7 @@ void LoadRTCs::openFile()
 
 		for(int j=0;j < d;j++)
 		{
-			createComp(name.c_str(),dir.c_str());
+			createComp(name.c_str(),filename.c_str(),dir.c_str());
 		}
 	}
 
@@ -125,7 +128,7 @@ compParam *LoadRTCs::getCompFromName(std::string name)
 	for(int i=0;i < compList.size();i++)
 	{
 		
-		if(compList[i].m_filename == name)
+		if(compList[i].m_name == name)
 		{
 			return &compList[i];
 		}
@@ -154,13 +157,13 @@ public:
 };
 
 
-bool LoadRTCs::createComp(const char* filename, const char* filepath)
+bool LoadRTCs::createComp(const char* name, const char* filename, const char* filepath)
 {
 	
 	updateCompList();
 	
 	RTCInitFunction InInitFunc = NULL;
-	compParam *preLoadComp = getCompFromName(filename);
+	compParam *preLoadComp = getCompFromName(name);
 	if(preLoadComp)
 	{
 		InInitFunc = preLoadComp->m_func;
@@ -199,7 +202,7 @@ bool LoadRTCs::createComp(const char* filename, const char* filepath)
 
 			
 			
-			compList.push_back(compParam(filename, filepath, InInitFunc, rl));
+			compList.push_back(compParam(name, filename, filepath, InInitFunc, rl));
 			cp = &compList[compList.size()-1];
 			
 		}
@@ -215,10 +218,10 @@ bool LoadRTCs::createComp(const char* filename, const char* filepath)
 
 }
 
-bool LoadRTCs::removeComp(const char* filename)
+bool LoadRTCs::removeComp(const char* name)
 {
 	updateCompList();
-	compParam *c = getCompFromName(filename);
+	compParam *c = getCompFromName(name);
 	
 	if(c)
 	{

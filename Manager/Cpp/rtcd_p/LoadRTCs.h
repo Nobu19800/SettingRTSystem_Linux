@@ -22,7 +22,8 @@ typedef void (*RTCInitFunction)(RTC::Manager* pManager);
 class compParam
 {
 public:
-	compParam(std::string filename, std::string filepath, RTCInitFunction func, std::vector<RTC::RtcBase *> compList);
+	compParam(std::string name, std::string filename, std::string filepath, RTCInitFunction func, std::vector<RTC::RtcBase *> compList);
+	std::string m_name;
 	std::string m_filename;
 	std::string m_filepath;
 	RTCInitFunction m_func;
@@ -43,8 +44,8 @@ class LoadRTCs
 
    void updateCompList();
    
-   bool createComp(const char* filename, const char* filepath);
-   bool removeComp(const char* filename);
+   bool createComp(const char* name, const char* filename, const char* filepath);
+   bool removeComp(const char* name);
    
    compParam *getCompFromName(std::string name);
    RTCInitFunction getFunc(std::string filename,std::string filepath);

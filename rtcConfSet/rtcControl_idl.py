@@ -36,12 +36,13 @@ _0_rtcControl.RTC_Data = omniORB.newEmptyClass()
 class RTC_Data (omniORB.StructBase):
     _NP_RepositoryId = "IDL:rtcControl/RTC_Data:1.0"
 
-    def __init__(self, name, num):
+    def __init__(self, name, filename, num):
         self.name = name
+        self.filename = filename
         self.num = num
 
 _0_rtcControl.RTC_Data = RTC_Data
-_0_rtcControl._d_RTC_Data  = (omniORB.tcInternal.tv_struct, RTC_Data, RTC_Data._NP_RepositoryId, "RTC_Data", "name", (omniORB.tcInternal.tv_string,0), "num", omniORB.tcInternal.tv_short)
+_0_rtcControl._d_RTC_Data  = (omniORB.tcInternal.tv_struct, RTC_Data, RTC_Data._NP_RepositoryId, "RTC_Data", "name", (omniORB.tcInternal.tv_string,0), "filename", (omniORB.tcInternal.tv_string,0), "num", omniORB.tcInternal.tv_short)
 _0_rtcControl._tc_RTC_Data = omniORB.tcInternal.createTypeCode(_0_rtcControl._d_RTC_Data)
 omniORB.registerType(RTC_Data._NP_RepositoryId, _0_rtcControl._d_RTC_Data, _0_rtcControl._tc_RTC_Data)
 del RTC_Data
@@ -77,7 +78,7 @@ omniORB.registerType(RTCDataInterface._NP_RepositoryId, _0_rtcControl._d_RTCData
 
 # RTCDataInterface operations and attributes
 RTCDataInterface._d_getRTC = ((), (omniORB.tcInternal.tv_boolean, omniORB.typeMapping["IDL:rtcControl/rtcPathSeq:1.0"]), None)
-RTCDataInterface._d_createComp = (((omniORB.tcInternal.tv_string,0), (omniORB.tcInternal.tv_string,0)), (omniORB.tcInternal.tv_boolean, ), None)
+RTCDataInterface._d_createComp = (((omniORB.tcInternal.tv_string,0), (omniORB.tcInternal.tv_string,0), (omniORB.tcInternal.tv_string,0)), (omniORB.tcInternal.tv_boolean, ), None)
 RTCDataInterface._d_removeComp = (((omniORB.tcInternal.tv_string,0), ), (omniORB.tcInternal.tv_boolean, ), None)
 RTCDataInterface._d_getCompList = ((), (omniORB.tcInternal.tv_boolean, omniORB.typeMapping["IDL:rtcControl/RTC_List:1.0"]), None)
 

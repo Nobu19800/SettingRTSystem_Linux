@@ -127,6 +127,10 @@ def decodestr(s):
     if isinstance(s, str):
         return s.decode('utf-8')
     return s
+def encodestr(s):
+    if not isinstance(s, str):
+        return s.encode('utf-8')
+    return s
 
 class RTComponentProfile():
     def __init__(self):
@@ -881,7 +885,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         if not os.path.exists(fname):
             f = open(fname, 'w')
             self.writeFileOption(f)
-
+            if os.name == 'nt':
+                cmd = "set PATH=%PATH%;" + os.path.relpath("..\\DLL",home_dirname).replace("/","\\")+ ";\n"
+                f.write(cmd)
             shutil.copy2("../startNamingService.py", os.path.join(home_dirname,"startNamingService.py"))
             if os.name == 'posix':
                 cmd = "python startNamingService.py\n"
@@ -1546,6 +1552,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         if not os.path.exists(wp):
             os.mkdir(wp)
 
+        cp = os.path.join(dname,"DLL")
+        if not os.path.exists(cp):
+            os.mkdir(cp)
+
         cp = os.path.join(dname,"Components")
         if not os.path.exists(cp):
             os.mkdir(cp)
@@ -1561,7 +1571,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             for tbi in tbinfo:
                 print tbi
         
-
+        """
         if os.name == 'nt':
             omni_root = os.environ.get("OMNI_ROOT")
             rtm_root = os.environ.get("RTM_ROOT")
@@ -1583,7 +1593,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 d_fname = os.path.basename(d)
                 cpp_manager_fn = os.path.join(manager_fn,"Cpp/rtcd_p/Release")
                 shutil.copy2(d, os.path.join(cpp_manager_fn,d_fname))
-
+        """
         
             
         self.createDirectDirScript("start", dname, homedir_fp)
@@ -1626,9 +1636,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                     if c["process"].poll() != None:
                         v.remove(c)
 
-    def getFilePath_dll(self, name):
+    def getFilePath_dll(self, name, filename):
         rp = RTComponentProfile()
-        filename = name
+        #filename = name
         if os.name == 'posix':
             filename += ".so"
         elif os.name == 'nt':
@@ -1640,9 +1650,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             return path,dname
         return "",""
 
-    def getFilePath_exe(self, name):
+    def getFilePath_exe(self, name, filename):
         rp = RTComponentProfile()
-        filename = name + "Comp"
+        filename = filename + "Comp"
         if os.name == 'nt':
             filename += ".exe"
         filepath = rp.getFile(name, filename)
@@ -1653,9 +1663,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             return path,dname,bname
         return "","",""
 
-    def getFilePath_py(self, name):
+    def getFilePath_py(self, name, filename):
         rp = RTComponentProfile()
-        filename = name
+        #filename = name
         filename += ".py"
         filepath = rp.getFile(name, filename)
         if filepath != "":
@@ -1669,17 +1679,18 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         self.updateCompList()
         rp = RTComponentProfile()
         ans,profile = rp.getProfile(name)
+        rtc_name = encodestr(profile.info.name)
         
         if ans:
             if runtype == 0:
                 if profile.language == u"C++":
                     
-                    path,dname = self.getFilePath_dll(name)
+                    path,dname = self.getFilePath_dll(name, rtc_name)
 
                     if path != "":
                         #if len(self.comp._rtcControl_cppPort.get_connector_profiles()) > 0:
                         try:
-                            ans = self.comp._rtcControl_cpp._ptr().createComp(name,dname)
+                            ans = self.comp._rtcControl_cpp._ptr().createComp(name, rtc_name,dname)
                         except:
                             return False
                             #ans = self._rtcControl_cpp._ptr().createComp("MyFirstComponent","..\\..\\..\\..\\Components\\MyFirstComponent\\src\\Release")
@@ -1688,7 +1699,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                             self.runRTCList[name] = []
                         #num = self.getRTC_Num(self.runRTCList[name])
                         #self.runRTCList[name][num] = {"type":runtype,"language":profile.language}
-                        self.runRTCList[name].append({"type":runtype,"language":profile.language,"directory":dname})
+                        self.runRTCList[name].append({"type":runtype,"language":profile.language,"directory":dname,"rtc_name":rtc_name})
                                 
                         return True
                         
@@ -1696,11 +1707,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                         return False
                 elif profile.language == u"Python":
                     
-                    path,dname,bname = self.getFilePath_py(name)
-
+                    path,dname,bname = self.getFilePath_py(name, rtc_name)
+                    
                     if path != "":
                         try:
-                            ans = self.comp._rtcControl_py._ptr().createComp(name,dname)
+                            ans = self.comp._rtcControl_py._ptr().createComp(name, rtc_name,dname)
                         except:
                             return False
 
@@ -1708,7 +1719,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                             self.runRTCList[name] = []
                         #num = self.getRTC_Num(self.runRTCList[name])
                         #self.runRTCList[name][num] = {"type":runtype,"language":profile.language}
-                        self.runRTCList[name].append({"type":runtype,"language":profile.language,"directory":dname})
+                        self.runRTCList[name].append({"type":runtype,"language":profile.language,"directory":dname,"rtc_name":rtc_name})
                                 
                         return True
 
@@ -1722,7 +1733,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                     
                 if profile.language == u"C++":
                     
-                    path,dname,bname = self.getFilePath_exe(name)
+                    path,dname,bname = self.getFilePath_exe(name, rtc_name)
 
                     if path != "":
                         com = bname
@@ -1750,7 +1761,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                         return False
                     
                 elif profile.language == u"Python":
-                    path,dname,bname = self.getFilePath_py(name)
+                    path,dname,bname = self.getFilePath_py(name, rtc_name)
 
                     if path != "":
                         com = "python " + bname
@@ -1821,6 +1832,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         for c in rtc_list:
             
             WriteString(c["name"],f)
+            WriteString(c["filename"],f)
             d = struct.pack("i", c["num"])
             
             f.write(d)
@@ -1844,8 +1856,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
             for c in rtc_list:
                 if c.num != 0:
-                    fname,dname = self.getFilePath_dll(c.name)
-                    c_list.append({"name":c.name,"num":c.num,"language":"C++","path":fname,"directory":dname})
+                    fname,dname = self.getFilePath_dll(c.name,c.filename)
+                    c_list.append({"name":c.name,"filename":c.filename,"num":c.num,"language":"C++","path":fname,"directory":dname})
                 
             filename = os.path.join(path,"RTCs_rtcd.conf")
             
@@ -1870,8 +1882,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
             for c in rtc_list:
                 if c.num != 0:
-                    fname,dname,bname = self.getFilePath_py(c.name)
-                    c_list.append({"name":c.name,"num":c.num,"language":"Python","path":fname,"directory":dname})
+                    fname,dname,bname = self.getFilePath_py(c.name,c.filename)
+                    c_list.append({"name":c.name,"filename":c.filename,"num":c.num,"language":"Python","path":fname,"directory":dname})
 
             filename = os.path.join(path,"RTCs_rtcd.conf")
             
@@ -2300,6 +2312,10 @@ def MyModuleInit(manager):
     comp = manager.createComponent("rtcConfSet")
 
 def main():
+    
+        if os.name == 'nt':
+            os.environ['PATH'] += ";"+os.path.abspath("..\\DLL")+";"
+        
 	mgr = OpenRTM_aist.Manager.init(sys.argv)
 	mgr.setModuleInitProc(MyModuleInit)
 	mgr.activateManager()

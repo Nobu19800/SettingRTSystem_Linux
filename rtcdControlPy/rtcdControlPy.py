@@ -61,8 +61,8 @@ class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
         # Must return: result, paths
 
     # boolean createComp(in string filename, in string filepath)
-    def createComp(self, filename, filepath):
-        return self.LoadRTCs.createComp(filename, filepath)
+    def createComp(self, name, filename, filepath):
+        return self.LoadRTCs.createComp(name, filename, filepath)
     
         raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
         # *** Implement me

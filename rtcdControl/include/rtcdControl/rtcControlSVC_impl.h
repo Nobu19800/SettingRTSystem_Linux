@@ -47,8 +47,8 @@ class RTCDataInterfaceSVC_impl
 
    // attributes and operations
    CORBA::Boolean getRTC(rtcControl::rtcPathSeq_out paths);
-   CORBA::Boolean createComp(const char* filename, const char* filepath);
-   CORBA::Boolean removeComp(const char* filename);
+   CORBA::Boolean createComp(const char* name, const char* filename, const char* filepath);
+   CORBA::Boolean removeComp(const char* name);
    CORBA::Boolean getCompList(rtcControl::RTC_List_out names);
    
 

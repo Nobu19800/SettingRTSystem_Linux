@@ -68,11 +68,11 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::getRTC(rtcControl::rtcPathSeq_out paths
 
 
 
-CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* filename, const char* filepath)
+CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* name, const char* filename, const char* filepath)
 {
 	
 	
-	return loadRTCsObject->createComp(filename,filepath);
+	return loadRTCsObject->createComp(name, filename,filepath);
 	
 	
   // Please insert your code here and remove the following warning pragma
@@ -82,9 +82,9 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* filename, const 
   return 0;
 }
 
-CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* filename)
+CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* name)
 {
-	return loadRTCsObject->removeComp(filename);
+	return loadRTCsObject->removeComp(name);
 	
   // Please insert your code here and remove the following warning pragma
 #ifndef WIN32
@@ -115,7 +115,8 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::getCompList(rtcControl::RTC_List_out na
 	{
 		if(loadRTCsObject->compList[i].m_compList.size() > 0)
 		{
-			paths_var[i].name = loadRTCsObject->compList[i].m_filename.c_str();
+			paths_var[i].name = loadRTCsObject->compList[i].m_name.c_str();
+			paths_var[i].filename = loadRTCsObject->compList[i].m_filename.c_str();
 			paths_var[i].num = loadRTCsObject->compList[i].m_compList.size();
 		}
 		
