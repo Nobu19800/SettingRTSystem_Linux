@@ -99,7 +99,11 @@ def WriteString(a, ofs):
     
     ofs.write(a2)
 
-
+def getUseDll(root, filename):
+    nameList = []
+    for name in glob.glob(os.path.join(root,filename)):
+        nameList.append(name)
+    return nameList
 
 
 def searchFile(name, dir):
@@ -474,12 +478,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
     def saveConfigFile(self, comp ,filePath, rtcconffile):
         name = comp.name.split(".")[0]
-        
+        name = comp.category + "." + name
         #compname = filePath+"/"+name+".conf"
         compname = os.path.join(filePath,name+".conf")
         f = open(compname, 'w')
 
-        s = comp.category + "." + name + ".config_file: " + os.path.relpath(compname).replace("\\","/") + "\n"
+        s = name + ".config_file: " + os.path.relpath(compname).replace("\\","/") + "\n"
         rtcconffile.write(s)
 
         s = "configuration.active_config: "
@@ -1184,6 +1188,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         return self.getObjByName(name,mgrList)
 
+    def setRTCConfigFile(self, f, dir):
+        rtc_list = getUseDll(dir, "*.*.conf")
+        for r in rtc_list:
+            fname = os.path.basename(r)
+            name =  fname.split(".")
+            path = os.path.relpath(r).replace("\\","/")
+            cmd = name[0]+"."+name[1]+".config_file: " + path + "\n"
+            f.write(cmd)
     # boolean startRTCD()
     def startRTCD_Cpp(self):
         if not self.rtcdCppFlag:
@@ -1197,6 +1209,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         f = open(self.cppDirName+"/rtc.conf", 'w')
         self.saveData(f, self.confList_cpp, self.cppDirName, True)
+        cmd = "TEST.rtcdControl0.config_file: ../rtcdControl/rtcdcontrol.conf\n"
+        f.write(cmd)
+        self.setRTCConfigFile(f, self.cppDirName)
         f.close()
 
         if os.name == 'posix':
@@ -1233,9 +1248,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         connectServicePort(port.object, self.comp._rtcControl_cppPort.getPortRef(), portname)
 
-        f = open(self.cppDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_cpp, self.cppDirName, True)
-        f.close()
+        #f = open(self.cppDirName+"/rtc.conf", 'w')
+        #self.saveData(f, self.confList_cpp, self.cppDirName, True)
+        #f.close()
         
         return True
         raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
@@ -1255,6 +1270,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         #print self.pyDirName+"/rtc.conf"
         f = open(self.pyDirName+"/rtc.conf", 'w')
         self.saveData(f, self.confList_py, self.pyDirName, True)
+        cmd = "TEST.rtcdControlPy0.config_file: ../rtcdControlPy/rtcdControlPy.conf\n"
+        f.write(cmd)
+        self.setRTCConfigFile(f, self.pyDirName)
         f.close()
 
         if os.name == 'posix':
@@ -1292,9 +1310,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         connectServicePort(port.object, self.comp._rtcControl_pyPort.getPortRef(), portname)
 
-        f = open(self.pyDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_py, self.pyDirName, True)
-        f.close()
+        #f = open(self.pyDirName+"/rtc.conf", 'w')
+        #self.saveData(f, self.confList_py, self.pyDirName, True)
+        #f.close()
         
         return True
 
@@ -1306,7 +1324,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
             
             if d.id == "manager.components.precreate":
-                
+                print d.data
                 for c in range(0,len(compositeList)):
                     s += "PeriodicECSharedComposite?&instance_name="+compositeList[c].name.split(".")[0]
                     #print c.name.split(".")
@@ -1316,10 +1334,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 if d.data != "":
                      s += ","
                         
-            if rtcdFlag and d.id == "exec_cxt.periodic.type":
-                s += "PeriodicExecutionContext"
+            #if rtcdFlag and d.id == "exec_cxt.periodic.type":
+            #    s += "PeriodicExecutionContext"
             
-            elif rtcdFlag == False and d.id == "exec_cxt.periodic.filename" and d.data == "":
+            if rtcdFlag == False and d.id == "exec_cxt.periodic.filename" and d.data == "":
                 text = os.path.relpath(filepath).replace("\\","/") + "/order.conf"
                 
                 of = open(text, "wb")
@@ -1461,11 +1479,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             shutil.rmtree(fn)
         shutil.copytree(path, fn)
         
-    def getUseDll(self, root, filename):
-        nameList = []
-        for name in glob.glob(os.path.join(root,filename)):
-            nameList.append(name)
-        return nameList
+
 
 
     def createDirectDirScript(self, name, dname, homedir_fp):
@@ -1899,6 +1913,13 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             for tbi in tbinfo:
                 print tbi
                 
+    def finalizeProcess(self):
+        self.clean_RTCs()
+        if self.rtcdControlprocess:
+            self.rtcdControlprocess.kill()
+        if self.rtcdControlPyprocess:
+            self.rtcdControlPyprocess.kill()
+            
     def open_RTCs(self, path):
         filename = os.path.join(path,"RTCs.conf")
         
@@ -1913,6 +1934,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             f.close()
 
     def clean_RTCs(self):
+        self.updateCompList()
         for k,v in self.runRTCList.items():
             for c in v:
                 if c["type"] == 0:
@@ -2103,9 +2125,9 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 	#	# @return RTC::ReturnCode_t
 	#
 	#	# 
-	#def onFinalize(self, ec_id):
-	#
-	#	return RTC.RTC_OK
+	def onFinalize(self, ec_id):
+		self._rtcconf.finalizeProcess()
+		return RTC.RTC_OK
 	
 	#	##
 	#	#
