@@ -291,19 +291,31 @@ class rtcdWidget(MTabWidget):
             
 
             self.parent.control_comp._rtcconf._ptr().setSystem()
+            self.mesBox(u"rtcdを起動しました")
         except:
+            self.mesBox(u"rtcdの起動に失敗しました")
             info = sys.exc_info()
             tbinfo = traceback.format_tb( info[2] )
             for tbi in tbinfo:
                 print tbi
 
     def addLoadSlot(self):
-        path = str(self.WidList["filepath"]["Widget"].text().toLocal8Bit())
-        if path != "":
-            self.parent.createTabs(path)
-            self.parent.curFile = path
-        else:
-            self.mesBox(u"ファイル名を入力してください")
+        text, ok = QtGui.QInputDialog.getText(self, u"IPアドレス入力",
+                u"IPアドレス", QtGui.QLineEdit.Normal,
+                self.WidList["textBox"]["Widget"].text())
+        if ok and text != '':
+            self.WidList["textBox"]["Widget"].setText(text)
+            filepath, ok2 = QtGui.QInputDialog.getText(self, u"ファイル名入力",
+                u"ファイル名", QtGui.QLineEdit.Normal,
+                self.WidList["filepath"]["Widget"].text())
+            if ok2 and filepath != '':
+                self.WidList["filepath"]["Widget"].setText(filepath)
+                path = str(self.WidList["filepath"]["Widget"].text().toLocal8Bit())
+                
+                self.parent.createTabs(path)
+                self.parent.curFile = path
+            else:
+                self.mesBox(u"ファイル名を入力してください")
 
     def addFilePathSlot(self):
         wid = self.WidList["filepath"]["Widget"]
@@ -317,6 +329,14 @@ class rtcdWidget(MTabWidget):
         self.parent.newFile()
         
     def saveFileSlot(self):
+        path = str(self.WidList["filepath"]["Widget"].text().toLocal8Bit())
+        if path == "":
+            filepath, ok = QtGui.QInputDialog.getText(self, u"ファイル名入力",
+                u"ファイル名", QtGui.QLineEdit.Normal,
+                self.WidList["filepath"]["Widget"].text())
+            if ok and filepath != '':
+                self.WidList["filepath"]["Widget"].setText(filepath)
+
         path = str(self.WidList["filepath"]["Widget"].text().toLocal8Bit())
         if path != "":
             self.parent.saveFile(path)

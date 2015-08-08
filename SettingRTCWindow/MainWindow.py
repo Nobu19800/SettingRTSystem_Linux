@@ -109,7 +109,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.createAction()
 	self.createMenus()
-
+	self.createToolBars()
 	#self.mgrc = ManagerControl("")
 	
 	self.tab_widget_cpp =  None
@@ -158,18 +158,18 @@ class MainWindow(QtGui.QMainWindow):
     ##
     def createAction(self):
 
-	self.newAct = QtGui.QAction("&New...",self)
+	self.newAct = QtGui.QAction(QtGui.QIcon(':/images/new.png'),"&New...",self)
 	self.newAct.setShortcuts(QtGui.QKeySequence.New)
         self.newAct.triggered.connect(self.newFile)
         
 
 
-	self.openAct = QtGui.QAction("&Open...",self)
+	self.openAct = QtGui.QAction(QtGui.QIcon(':/images/open.png'),"&Open...",self)
         self.openAct.setShortcuts(QtGui.QKeySequence.Open)
         self.openAct.triggered.connect(self.open)
 
 
-        self.saveAct = QtGui.QAction("&Save",self)
+        self.saveAct = QtGui.QAction(QtGui.QIcon(':/images/save.png'),"&Save",self)
         self.saveAct.setShortcuts(QtGui.QKeySequence.Save)
         self.saveAct.triggered.connect(self.save)
 
@@ -179,6 +179,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.createPackageAct = QtGui.QAction("&Create &Package",self)
         self.createPackageAct.triggered.connect(self.createPackage)
+
+        self.rtcdAct = QtGui.QAction(QtGui.QIcon(':/images/run.png'),"&rtcd &Start",self)
+        self.rtcdAct.triggered.connect(self.rtcdRun)
 
     def deleteTabs(self):
         if self.tab_widget_cpp:
@@ -203,7 +206,15 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.saveAsAct)
         self.fileMenu.addAction(self.createPackageAct)
         
+        
+        
 
+    def createToolBars(self):
+        self.fileToolBar = self.addToolBar("File")
+        self.fileToolBar.addAction(self.newAct)
+        self.fileToolBar.addAction(self.openAct)
+        self.fileToolBar.addAction(self.saveAct)
+        self.fileToolBar.addAction(self.rtcdAct)
 
     def createTabs(self, filapath):
         ipaddress = str(self.rtcd_widget.WidList["textBox"]["Widget"].text().toLocal8Bit())
@@ -229,7 +240,10 @@ class MainWindow(QtGui.QMainWindow):
         while flag:
             
             try:
-                self.control_comp._rtcconf._ptr().open(filapath)
+                ans = self.control_comp._rtcconf._ptr().open(filapath)
+                if ans == False:
+                    self.mesBox(u"ファイルを開くのに失敗しました")
+                    return
                 wid = self.rtcd_widget.WidList["rtcList"]["Widget"]
                 clist = self.control_comp._rtcconf._ptr().getExRTCList()[1]
                 wid.clear()
@@ -238,6 +252,7 @@ class MainWindow(QtGui.QMainWindow):
                 
                 flag = False
             except:
+                
                 info = sys.exc_info()
                 tbinfo = traceback.format_tb( info[2] )
                 for tbi in tbinfo:
@@ -481,11 +496,18 @@ class MainWindow(QtGui.QMainWindow):
     #初期化のスロット
     ##
     def newFile(self):
-        self.createTabs("rtc.conf")
-        self.curFile = ""
-
-
+        text, ok = QtGui.QInputDialog.getText(self, u"IPアドレス入力",
+                u"IPアドレス", QtGui.QLineEdit.Normal,
+                self.rtcd_widget.WidList["textBox"]["Widget"].text())
+        if ok and text != '':
+            self.rtcd_widget.WidList["textBox"]["Widget"].setText(text)
+            self.createTabs("rtc.conf")
+            self.curFile = ""
         
+
+
+    def rtcdRun(self):
+        self.rtcd_widget.rtcdSlot()
 
     def mesBox(self, mes):
         msgbox = QtGui.QMessageBox( self )

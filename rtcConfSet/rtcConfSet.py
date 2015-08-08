@@ -386,12 +386,16 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         self.runRTCList = {}        
 
     def open(self, filename):
+        if filename != "rtc.conf":
+            if not os.path.exists(filename):
+                return False
+            
         self.rtcdCppFlag = True
         self.rtcdPyFlag = True
         self.filepath = os.path.abspath(filename)
         #sys.stdout.write(filename)
         #print filename
-
+        
         dirname = self.setFolder(filename)
 
         self.exRTCList = []
@@ -636,7 +640,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         compositeRTCList = self.judgeLanguageComps(compositeList)
 
         
-
+        
         dirname = self.setFolder(filename)
         
         
