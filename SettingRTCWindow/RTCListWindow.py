@@ -19,6 +19,7 @@ import random
 import commands
 import math
 import imp
+import webbrowser
 
 import rtctree.tree
 
@@ -31,7 +32,7 @@ from OpenRTM_aist import CorbaConsumer
 from omniORB import CORBA
 import CosNaming
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtWebKit
 
 
 import imp
@@ -275,6 +276,7 @@ class RTComponentProfile():
         return ""
 
 """
+
 
 
 class RenderPath_s(QtGui.QWidget):
@@ -920,6 +922,24 @@ def addLineEditBox(name, text, layout):
         
     layout.addLayout(subLayout)
 
+def openWeb(url):
+    webbrowser.open(str(url.toString().toLocal8Bit()))
+
+def addWebView(name, text, layout):
+    nameLabel = QtGui.QLabel(name)
+    nameEdit = QtWebKit.QWebView()
+    nameEdit.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
+    nameLabel.setBuddy(nameEdit)
+
+    nameEdit.setHtml(text)
+    nameEdit.linkClicked.connect(openWeb)
+
+    subLayout = QtGui.QHBoxLayout()
+    subLayout.addWidget(nameLabel)
+    subLayout.addWidget(nameEdit)
+        
+    layout.addLayout(subLayout)
+
 def addTextEditBox(name, text, layout):
     nameLabel = QtGui.QLabel(name)
     nameEdit = QtGui.QTextEdit()
@@ -1048,6 +1068,7 @@ class ViewWindow(QtGui.QDialog):
         self.setWindowTitle(name)
         
         self.mainLayout = QtGui.QVBoxLayout()
+         
         self.setLayout(self.mainLayout)
         self.profile = profile
         self.scene = QtGui.QGraphicsScene(0, 0, 170, 170)
@@ -1055,9 +1076,12 @@ class ViewWindow(QtGui.QDialog):
         self.view = QtGui.QGraphicsView(self.scene)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)
         self.view.setBackgroundBrush(QtGui.QColor(230, 200, 167))
+
+        self.view.setMinimumHeight(200)
         
         
         self.mainLayout.addWidget(self.view)
+        
         self.renderWindow = RenderRTC(profile, self.scene)
 
         
@@ -1065,11 +1089,12 @@ class ViewWindow(QtGui.QDialog):
         addLineEditBox(u"バージョン",profile.version,self.mainLayout)
         addLineEditBox(u"言語",profile.language,self.mainLayout)
         addLineEditBox(u"モジュール概要",profile.info.description,self.mainLayout)
-        addTextEditBox(u"概要",profile.info.abstracts,self.mainLayout)
+        addWebView(u"概要",profile.info.abstracts,self.mainLayout)
         
         self.showConfigurationButton = QtGui.QPushButton(u"コンフィギュレーションパラメータ表示")
         self.showConfigurationButton.clicked.connect(self.showConfigurationSlot)
         self.mainLayout.addWidget(self.showConfigurationButton)
+        
 
     def showConfigurationSlot(self):
         
