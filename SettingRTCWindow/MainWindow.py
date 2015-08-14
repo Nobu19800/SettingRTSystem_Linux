@@ -118,7 +118,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	
 	self.curFile = ""
-
+	self.rtcdFlag = False
 	#self.mgrc.CreateComp("MyFirstComponent",[".\\MyFirstComponent"])
         #self.mgrc.CreateComp("MyFirstComponent",[".\\MyFirstComponent"])
 
@@ -296,10 +296,15 @@ class MainWindow(QtGui.QMainWindow):
             self.rtclistArea.setWidget(self.rtclistWindow)
 
     def createComp(self, name, type):
+        if self.rtcdFlag == False:
+            self.mesBox(u"rtcdを起動していません。\nツールバーのrtcd起動ボタンを押してください。")
+            return
         try:
             ans = self.control_comp._rtcconf._ptr().createComp(name, type)
             if ans == False:
                 self.mesBox(u"起動に失敗しました")
+            else:
+                self.mesBox(name+u"を起動しました")
         except:
             info = sys.exc_info()
             tbinfo = traceback.format_tb( info[2] )
@@ -508,6 +513,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def rtcdRun(self):
         self.rtcd_widget.rtcdSlot()
+        self.rtcdFlag = True
 
     def mesBox(self, mes):
         msgbox = QtGui.QMessageBox( self )
