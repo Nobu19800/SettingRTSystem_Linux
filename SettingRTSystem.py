@@ -52,13 +52,13 @@ def main():
     app.processEvents()
     
     if os.name == 'posix':
-        process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf".split(" "), stdout=subprocess.PIPE)
-        process_confset = subprocess.Popen("sh rtcConfSet.sh".split(" "), stdout=subprocess.PIPE)
+        process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf".split(" "))
+        process_confset = subprocess.Popen("sh rtcConfSet.sh".split(" "))
         #process_confset = os.system("sh rtcConfSet.sh&")
     elif os.name == 'nt':
-        process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf", stdout=subprocess.PIPE)
+        process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf")
         #process_rtcd = os.system("start python Manager/Python/rtcd.py -f Manager/Python/rtc.conf")
-        process_confset = subprocess.Popen("rtcConfSet.bat", stdout=subprocess.PIPE)
+        process_confset = subprocess.Popen("rtcConfSet.bat")
         #process_confset = os.system("start rtcConfSet.bat")
 
     
@@ -72,9 +72,9 @@ def main():
     
 
     if os.name == 'posix':
-        subprocess.Popen("python exitRTCs.py".split(" "), stdout=subprocess.PIPE)
+        subprocess.Popen("python exitRTCs.py".split(" "))
     elif os.name == 'nt':
-        subprocess.Popen("python exitRTCs.py", stdout=subprocess.PIPE)
+        subprocess.Popen("python exitRTCs.py")
         
     
     

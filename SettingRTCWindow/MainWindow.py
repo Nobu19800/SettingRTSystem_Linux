@@ -78,6 +78,8 @@ class MainWindow(QtGui.QMainWindow):
         super(MainWindow, self).__init__()
 
 	self.setWindowTitle(u"複合コンポーネント作成支援ツール")
+	self.setMinimumWidth(700)
+	
         self.tree = None
         
         self.mgr = OpenRTM_aist.Manager.init(sys.argv)

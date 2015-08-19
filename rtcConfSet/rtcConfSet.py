@@ -1226,7 +1226,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         try:
             #os.system(com)
-            self.rtcdControlprocess = subprocess.Popen(com, stdout=subprocess.PIPE)
+            self.rtcdControlprocess = subprocess.Popen(com)
         except:
             info = sys.exc_info()
             tbinfo = traceback.format_tb( info[2] )
@@ -1288,7 +1288,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         #print com
         
         try:
-            self.rtcdControlPyprocess = subprocess.Popen(com, stdout=subprocess.PIPE)
+            self.rtcdControlPyprocess = subprocess.Popen(com)
         except:
             info = sys.exc_info()
             tbinfo = traceback.format_tb( info[2] )
@@ -1400,7 +1400,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
             
             try:
-                process = subprocess.Popen(com, stdout=subprocess.PIPE)
+                process = subprocess.Popen(com)
             except:
                 info = sys.exc_info()
                 tbinfo = traceback.format_tb( info[2] )
@@ -1418,7 +1418,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 com = "cmd /c rtresurrect " + os.path.relpath(name).replace("\\","/")
             
             try:
-                process = subprocess.Popen(com, stdout=subprocess.PIPE)
+                process = subprocess.Popen(com)
             except:
                 info = sys.exc_info()
                 tbinfo = traceback.format_tb( info[2] )
@@ -1762,7 +1762,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                         cwd = os.getcwd()
                         os.chdir(dname)
                         
-                        sp = subprocess.Popen(com, stdout=subprocess.PIPE)
+                        sp = subprocess.Popen(com)
                         os.chdir(cwd)
                         
                         if name not in self.runRTCList:
@@ -1788,7 +1788,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                         
                         cwd = os.getcwd()
                         os.chdir(dname)
-                        sp = subprocess.Popen(com, stdout=subprocess.PIPE)
+                        sp = subprocess.Popen(com)
                         os.chdir(cwd)
 
                         if name not in self.runRTCList:
@@ -2238,8 +2238,6 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 		#
 		#
 	def onExecute(self, ec_id):
-
-        	
                 #print len(self._rtcControl_pyPort.get_connector_profiles())
 
         
