@@ -4,8 +4,7 @@
 
 """
  @file exitRTCs.py
- @brief exitRTCs
- @date $Date$
+ @brief rtcConfSetReq.rtcとmanager_composite.mgrを終了させる
 
 
 """
@@ -32,7 +31,9 @@ import OpenRTM_aist
 
 
 
-
+##
+# @brief rtcConfSetReq.rtcとmanager_composite.mgrを終了させる
+# @param node ノード
 def getNode(node):
     #values = node._children.values()
     values = node.children
@@ -61,11 +62,13 @@ def getNode(node):
 
 
 
-
+##
+# @brief メイン関数
 def main():
     path = ['/', 'localhost']
     tree = rtctree.tree.RTCTree(servers='localhost')
     getNode(tree.get_node(path))
+    
 
 if __name__ == "__main__":
     main()

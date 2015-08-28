@@ -1,7 +1,7 @@
 // -*-C++-*-
 /*!
  * @file  rtcControlSVC_impl.h
- * @brief Service implementation header of rtcControl.idl
+ * @brief RTC起動関連のサービスインターフェース
  *
  */
 
@@ -22,33 +22,55 @@
 
 
 
-/*!
- * @class RTCDataInterfaceSVC_impl
- * Example class implementing IDL interface rtcControl::RTCDataInterface
- */
+
+/**
+* @class RTCDataInterfaceSVC_impl
+*@brief RTC起動関連のサービスインターフェース
+*/
 class RTCDataInterfaceSVC_impl
  : public virtual POA_rtcControl::RTCDataInterface,
    public virtual PortableServer::RefCountServantBase
 {
  private:
-   // Make sure all instances are built on the heap by making the
-   // destructor non-public
-   //virtual ~RTCDataInterfaceSVC_impl();
+
 
  public:
-  /*!
-   * @brief standard constructor
-   */
+
+	 /**
+	 *@brief コンストラクタ
+	 * @param manager マネージャオブジェクト
+	 */
 	 RTCDataInterfaceSVC_impl(RTC::Manager* manager);
-  /*!
-   * @brief destructor
-   */
+	 /**
+	 *@brief デストラクタ
+	 */
    virtual ~RTCDataInterfaceSVC_impl();
 
-   // attributes and operations
+   /**
+   *@brief 実行中のRTCのパスのリストを取得
+   * @param paths RTCのパスのリスト
+   * @return 成功でTrue、失敗でFalse
+   */
    CORBA::Boolean getRTC(rtcControl::rtcPathSeq_out paths);
+   /**
+   *@brief RTC起動
+   * @param name RTC名
+   * @param filename ファイル名
+   * @param filepath ディレクトリパス
+   * @return 成功でTrue、失敗でFalse
+   */
    CORBA::Boolean createComp(const char* name, const char* filename, const char* filepath);
+   /**
+   *@brief RTC削除
+   * @param name RTC名
+   * @return 成功でTrue、失敗でFalse
+   */
    CORBA::Boolean removeComp(const char* name);
+   /**
+   *@brief 起動したRTCのリスト
+   * @param names 起動したRTCのリスト
+   * @return成功でTrue、失敗でFalse
+   */
    CORBA::Boolean getCompList(rtcControl::RTC_List_out names);
    
 

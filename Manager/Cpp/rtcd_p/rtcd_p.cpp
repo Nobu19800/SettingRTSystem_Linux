@@ -6,6 +6,12 @@
 #include "LoadRTCs.h"
 
 
+/**
+*@brief プロパティから指定したキーの値を取得
+* @param prop プロパティ
+* @param key キー
+* @param value 値
+*/
 template <class T>
 void getProperty(coil::Properties& prop, const char* key, T& value)
 {
@@ -19,6 +25,11 @@ void getProperty(coil::Properties& prop, const char* key, T& value)
 	}
 }
 
+/**
+*@brief 指定したキーの値を取得
+* @param name キー
+* @return 値
+*/
 std::string getParam(std::string name)
 {
 	coil::Properties& prop(::RTC::Manager::instance().getConfig());
@@ -28,6 +39,13 @@ std::string getParam(std::string name)
 	return param;
 }
 
+
+/**
+*@brief メイン関数
+* @param argc コマンドライン引数の数
+* @param argv コマンドライン引数
+* @return 0
+*/
 int main(int argc, char** argv)
 {
 	RTC::Manager* manager;

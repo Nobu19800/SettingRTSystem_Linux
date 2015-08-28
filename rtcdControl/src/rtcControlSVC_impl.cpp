@@ -1,7 +1,7 @@
 // -*-C++-*-
 /*!
  * @file  rtcControlSVC_impl.cpp
- * @brief Service implementation code of rtcControl.idl
+ * @brief RTC起動関連のサービスインターフェース
  *
  */
 
@@ -11,27 +11,32 @@
 
 
 
-/*
- * Example implementational code for IDL interface rtcControl::RTCDataInterface
- */
+/**
+*@brief RTC起動関連のサービスインターフェースのコンストラクタ
+* @param manager マネージャオブジェクト
+*/
 RTCDataInterfaceSVC_impl::RTCDataInterfaceSVC_impl(RTC::Manager* manager)
 {
 	mgr = manager;
 	loadRTCsObject = new LoadRTCs(manager);
 	loadRTCsObject->openFile();
-  // Please add extra constructor code here.
+  
 }
 
-
+/**
+*@brief RTC起動関連のサービスインターフェースのデストラクタ
+*/
 RTCDataInterfaceSVC_impl::~RTCDataInterfaceSVC_impl()
 {
-  // Please add extra destructor code here.
+  
 }
 
 
-/*
- * Methods corresponding to IDL attributes and operations
- */
+/**
+*@brief 実行中のRTCのパスのリストを取得
+* @param paths RTCのパスのリスト
+* @return 成功でTrue、失敗でFalse
+*/
 CORBA::Boolean RTCDataInterfaceSVC_impl::getRTC(rtcControl::rtcPathSeq_out paths)
 {
 	rtcControl::rtcPathSeq_var paths_var = new rtcControl::rtcPathSeq;
@@ -55,7 +60,8 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::getRTC(rtcControl::rtcPathSeq_out paths
 		
 	}
 	paths = paths_var._retn();
-  // Please insert your code here and remove the following warning pragma
+	return true;
+  
 #ifndef WIN32
   #warning "Code missing in function <CORBA::Boolean RTCDataInterfaceSVC_impl::getRTC(rtcControl::rtcPathSeq_out paths)>"
 #endif
@@ -67,7 +73,13 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::getRTC(rtcControl::rtcPathSeq_out paths
 
 
 
-
+/**
+*@brief RTC起動
+* @param name RTC名
+* @param filename ファイル名
+* @param filepath ディレクトリパス
+* @return 成功でTrue、失敗でFalse
+*/
 CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* name, const char* filename, const char* filepath)
 {
 	
@@ -75,25 +87,34 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* name, const char
 	return loadRTCsObject->createComp(name, filename,filepath);
 	
 	
-  // Please insert your code here and remove the following warning pragma
+  
 #ifndef WIN32
   #warning "Code missing in function <CORBA::Boolean RTCDataInterfaceSVC_impl::createComp(const char* filename, const char* filepath)>"
 #endif
   return 0;
 }
 
+/**
+*@brief RTC削除
+* @param name RTC名
+* @return 成功でTrue、失敗でFalse
+*/
 CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* name)
 {
 	return loadRTCsObject->removeComp(name);
 	
-  // Please insert your code here and remove the following warning pragma
+  
 #ifndef WIN32
   #warning "Code missing in function <CORBA::Boolean RTCDataInterfaceSVC_impl::removeComp(const char* name)>"
 #endif
   return 0;
 }
 
-
+/**
+*@brief 起動したRTCのリスト
+* @param names 起動したRTCのリスト
+* @return成功でTrue、失敗でFalse
+*/
 CORBA::Boolean RTCDataInterfaceSVC_impl::getCompList(rtcControl::RTC_List_out names)
 {
 
@@ -133,7 +154,7 @@ CORBA::Boolean RTCDataInterfaceSVC_impl::getCompList(rtcControl::RTC_List_out na
 }
 
 
-// End of example implementational code
+
 
 
 

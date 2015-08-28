@@ -2,8 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 ##
-#   @file .py
-#   @brief 
+#   @file rtcdWidget.py
+#   @brief rtcd操作ウインドウ
 
 
 
@@ -77,9 +77,15 @@ class TreeNode:
     def getDisplayValue(self):
         return str(self.node.text(0).toLocal8Bit())
 
-
+##
+# @class rtcdWidget
+# @brief RTCD操作ウィジェット
+#
 class rtcdWidget(MTabWidget):
-    
+    ##
+    # @brief コンストラクタ
+    # @param self 
+    # @param parent 親ウィジェット
     def __init__(self, parent=None):
         MTabWidget.__init__(self, None, parent)
         self.parent = parent
@@ -147,6 +153,9 @@ class rtcdWidget(MTabWidget):
         #print self.compList
 
 
+    ##
+    # @brief パッケージ作成ボタンのスロット
+    # @param self 
     def pkgSlot(self):
         filename = str(self.WidList["packagepath"]["Widget"].text().toLocal8Bit())
         if filename != "":
@@ -154,6 +163,9 @@ class rtcdWidget(MTabWidget):
         else:
             self.mesBox(u"ファイル名を入力してください")
 
+    ##
+    # @brief RTC追加ボタンのスロット
+    # @param self 
     def addRTCSlot(self):
         
         rtc = self.getSelectRTC()
@@ -167,19 +179,27 @@ class rtcdWidget(MTabWidget):
             if wid.findText(s) == -1:        
                 wid.addItem(s)
 
+    ##
+    # @brief RTC削除ボタンのスロット
+    # @param self 
     def remRTCSlot(self):
         wid = self.WidList["rtcList"]["Widget"]
         wid.removeItem(wid.findText(wid.currentText()))
 
     ##
     # @brief ツリーのマウスでの操作に対するコールバック
-    # @param self 
+    # @param self
+    # @param obj 
     #
     def treeWidgetSlot(self, obj):
         
         self.selItem = self.getTreeNode(obj)
         #print self.getSelectRTC()
 
+    ##
+    # @brief ツリーで選択中のRTCを取得
+    # @param self
+    # @return RTCオブジェクト
     def getSelectRTC(self):
         mlist = []
         node = self.selItem
@@ -216,10 +236,16 @@ class rtcdWidget(MTabWidget):
     #
     def getSelection(self):
         return self.selItem
-    
+
+    ##
+    # @brief ツリー更新ボタンのスロット
+    # @param self
     def updateTreeSlot(self):
         self.setRTCTree()
 
+    ##
+    # @brief ツリー初期化
+    # @param self
     def setRTCTree(self):
         self.treeWidget.clear()
         self.treeNodeList = []
@@ -236,25 +262,48 @@ class rtcdWidget(MTabWidget):
             
 
         
-
+    ##
+    # @brief ツリーノードを取得
+    # @param self
+    # @param obj オブジェクト
+    # @return ツリーノード
     def getTreeNode(self, obj):
         for i in self.treeNodeList:
             if i.node == obj:
                 return i
         return None
-    
+
+    ##
+    # @brief ツリーノードを作成
+    # @param self
+    # @param name 名前
+    # @param sel 
+    # @return ツリーノード
     def createNode(self, name, sel):
         tmp = TreeNode(QtGui.QTreeWidgetItem([name]), self)
         self.treeNodeList.append(tmp)
         return tmp
-    
+
+    ##
+    # @brief RTCのリスト、ツリーを作成
+    # @param self
+    # @param server ネームサーバー
+    # @param oParent ツリーノード
+    # @return RTCリスト
     def getRTCList(self, server, oParent):
          self.tree = rtctree.tree.RTCTree(servers=server,orb=self.parent.control_comp._manager.getORB())
          plist = []
          path = ["/"]
          self.getNode(self.tree._root, path, plist, oParent)
          return plist
-        
+
+    ##
+    # @brief RTCのリスト、ツリーを作成
+    # @param self
+    # @param node 現在のノード
+    # @param path 現在のパス
+    # @param plist RTCリスト
+    # @param oParent 親ノード  
     def getNode(self, node, path, plist, oParent):
         
         values = node._children.values()
@@ -280,7 +329,9 @@ class rtcdWidget(MTabWidget):
                 self.getNode(v,tmpPath,plist,oChild)
             
                 
-
+    ##
+    # @brief RTCD起動ボタンのスロット
+    # @param self
     def rtcdSlot(self):
         try:
             self.parent.setDataCpp()
@@ -299,6 +350,9 @@ class rtcdWidget(MTabWidget):
             for tbi in tbinfo:
                 print tbi
 
+    ##
+    # @brief ファイル読み込みボタンのスロット
+    # @param self
     def addLoadSlot(self):
         text, ok = QtGui.QInputDialog.getText(self, u"IPアドレス入力",
                 u"IPアドレス", QtGui.QLineEdit.Normal,
@@ -317,6 +371,9 @@ class rtcdWidget(MTabWidget):
             else:
                 self.mesBox(u"ファイル名を入力してください")
 
+    ##
+    # @brief ファイル読み込みボタンのスロット
+    # @param self
     def addFilePathSlot(self):
         wid = self.WidList["filepath"]["Widget"]
         text = self.parent.getFilePath()
@@ -325,9 +382,15 @@ class rtcdWidget(MTabWidget):
         
         wid.setText(text)
 
+    ##
+    # @brief 新規作成ボタンのスロット
+    # @param self
     def newFileSlot(self):
         self.parent.newFile()
-        
+
+    ##
+    # @brief ファイル保存ボタンのスロット
+    # @param self 
     def saveFileSlot(self):
         path = str(self.WidList["filepath"]["Widget"].text().toLocal8Bit())
         if path == "":
@@ -344,61 +407,3 @@ class rtcdWidget(MTabWidget):
         else:
             self.mesBox(u"ファイル名を入力してください")
 
-    def delLangSlot(self):
-        wid = self.WidList["manager.supported_languages"]["Widget"]
-        wid.removeItem(wid.findText(wid.currentText()))
-
-    def createCompSlot(self):
-        wid = self.WidList["manager.components.precreate"]["Widget"]
-        s = str(wid.currentText().toLocal8Bit())
-        
-        comp = self.mgrc.mgr.createComponent(s)
-        if not comp:
-            self.mesBox(u"RTCの起動に失敗しました")
-            return
-        wid.addItem(wid.currentText())
-
-        self.mgrc.addComp(s, comp)
-
-    def delCompSlot(self):
-        wid = self.WidList["manager.components.precreate"]["Widget"]
-        self.mgrc.deleteComp(str(wid.currentText().toLocal8Bit()))
-        wid.removeItem(wid.findText(wid.currentText()))
-
-        
-
-    def delModuleSlot(self):
-        wid = self.WidList["manager.modules.preload"]["Widget"]
-        wid.removeItem(wid.findText(wid.currentText()))
-
-    def delPathSlot(self):
-        wid = self.WidList["manager.modules.load_path"]["Widget"]
-        wid.removeItem(wid.findText(wid.currentText()))
-
-    def loadRTCSlot(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","","Python File (*.py);;All Files (*)")
-
-        if fileName.isEmpty():
-            return
-        ba = str(fileName.toLocal8Bit())
-        fname = os.path.basename(ba)
-        name, ext = os.path.splitext(fname)
-        dname = os.path.dirname(os.path.relpath(ba))
-        if self.mgrc.createComp(name,[dname]) == False:
-            self.mesBox(u"モジュールの読み込みに失敗しました")
-            return
-
-        wid = self.WidList["manager.components.precreate"]["Widget"]
-        wid.addItem(name)
-
-        wid = self.WidList["manager.modules.preload"]["Widget"]
-        if wid.findText(fname) == -1:
-            wid.addItem(fname)
-
-        wid = self.WidList["manager.modules.load_path"]["Widget"]
-
-        if dname == "":
-            dname = "./" + dname
-        if wid.findText(dname) == -1:
-            
-            wid.addItem(dname)

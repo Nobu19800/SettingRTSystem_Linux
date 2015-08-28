@@ -1,18 +1,24 @@
-// -*-C++-*-
 /*!
- * @file  LoadRTCs.cpp
- * @brief 
- *
- */
+* @file  LoadRTCs.cpp
+* @brief RTC読み込み関連のクラス、関連
+*
+*/
 
 #include <coil/stringutil.h>
-#include "CompSearch.h"
+#include "FileStreamFunc.h"
 #include "LoadRTCs.h"
 
 using namespace std;
 
 
-
+/**
+*@brief 動的リンクライブラリから読み込んだRTCの各情報を格納するクラスのコンストラクタ
+* @param name RTC名
+* @param filename ファイル名
+* @param filepath ディレクトリパス
+* @param func 初期化関数
+* @param compList RTCオブジェクトのリスト
+*/
 compParam::compParam(std::string name, std::string filename, std::string filepath, RTCInitFunction func, std::vector<RTC::RtcBase *> compList)
 {
 	m_name = name;
@@ -23,18 +29,27 @@ compParam::compParam(std::string name, std::string filename, std::string filepat
 }
 
 
+/**
+*@brief RTCロード関連の関数を持つクラスのコンストラクタ
+* @param manager マネージャオブジェクト
+*/
 LoadRTCs::LoadRTCs(RTC::Manager* manager)
 {
 	mgr = manager;
 
 }
 
-
+/**
+*@brief RTCロード関連の関数を持つクラスのデストラクタ
+*/
 LoadRTCs::~LoadRTCs()
 {
 
 }
 
+/**
+*@brief ファイルから起動するRTCのリストを読み込んで各RTCを起動
+*/
 void LoadRTCs::openFile()
 {
 	coil::Properties& prop(::RTC::Manager::instance().getConfig());
@@ -80,7 +95,12 @@ void LoadRTCs::openFile()
 	ifs.close();
 }
 
-
+/**
+*@brief ファイル名からRTCの初期化関数を取得
+* @param filename ファイル名
+* @param filepath ディレクトリパス
+* @return RTCの初期化関数
+*/
 RTCInitFunction LoadRTCs::getFunc(std::string filename,std::string filepath)
 {
 #ifdef _WINDOWS
@@ -123,6 +143,11 @@ RTCInitFunction LoadRTCs::getFunc(std::string filename,std::string filepath)
 	return InInitFunc;
 }
 
+/**
+*@brief RTC名からRTCの各情報を取得
+* @param name RTC名
+* @return RTCの各情報
+*/
 compParam *LoadRTCs::getCompFromName(std::string name)
 {
 	for(int i=0;i < compList.size();i++)
@@ -137,26 +162,15 @@ compParam *LoadRTCs::getCompFromName(std::string name)
 }
 
 
-class RTC_FinalizeListener
-    : public RTC::PostComponentActionListener
-{
-public:
-	RTC_FinalizeListener(RTC::RtcBase * rtc, compParam *list)
-	{
-		m_rtc = rtc;
-		m_list = list;
-	};
-	void operator()(RTC::UniqueId ec_id, RTC::ReturnCode_t ret)
-	{
-		//std::cout << m_list->m_filename << coil::otos<int>(ec_id) << std::endl;
-		//m_list->m_compList.clear();
-		m_list->m_compList.erase(std::remove(m_list->m_compList.begin(), m_list->m_compList.end(), m_rtc), m_list->m_compList.end());
-	};
-	RTC::RtcBase * m_rtc;
-	compParam *m_list;
-};
 
 
+/**
+*@brief RTC起動の関数
+* @param name RTC名
+* @param filename ファイル名
+* @param filepath ディレクトリパス
+* @return 成功でTrue、失敗でFalse
+*/
 bool LoadRTCs::createComp(const char* name, const char* filename, const char* filepath)
 {
 	
@@ -218,6 +232,12 @@ bool LoadRTCs::createComp(const char* name, const char* filename, const char* fi
 
 }
 
+
+/**
+*@brief RTC削除の関数(同一のRTCを複数起動している場合は一番最後に起動したRTCを終了)
+* @param name RTC名
+* @return 成功でTrue、失敗でFalse
+*/
 bool LoadRTCs::removeComp(const char* name)
 {
 	updateCompList();
@@ -244,6 +264,9 @@ bool LoadRTCs::removeComp(const char* name)
 
 }
 
+/**
+*@brief 削除予定
+*/
 void LoadRTCs::updateCompList()
 {
 	/*std::cout << "test2" << std::endl;
@@ -270,6 +293,29 @@ void LoadRTCs::updateCompList()
 	}*/
 }
 
+
+/**
+*@brief RTC終了時にRTCのリストから削除するのリスナのコンストラクタ
+* @param rtc RTCオブジェクト
+* @param list RTCの各情報
+*/
+RTC_FinalizeListener::RTC_FinalizeListener(RTC::RtcBase * rtc, compParam *list)
+{
+	m_rtc = rtc;
+	m_list = list;
+};
+
+/**
+*@brief RTC終了時にRTCのリストから削除する
+* @param ec_id 実行コンテキストのID
+* @param list RTC::ReturnCode_t
+*/
+void RTC_FinalizeListener::operator()(RTC::UniqueId ec_id, RTC::ReturnCode_t ret)
+{
+	//std::cout << m_list->m_filename << coil::otos<int>(ec_id) << std::endl;
+	//m_list->m_compList.clear();
+	m_list->m_compList.erase(std::remove(m_list->m_compList.begin(), m_list->m_compList.end(), m_rtc), m_list->m_compList.end());
+};
 
 
 // End of example implementational code

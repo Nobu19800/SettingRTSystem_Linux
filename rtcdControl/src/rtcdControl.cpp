@@ -1,7 +1,7 @@
 // -*- C++ -*-
 /*!
  * @file  rtcdControl.cpp
- * @brief rtcdControl
+ * @brief RTCD操作のRTC
  * @date $Date$
  *
  * $Id$
@@ -28,10 +28,11 @@ static const char* rtcdcontrol_spec[] =
   };
 // </rtc-template>
 
+
 /*!
- * @brief constructor
- * @param manager Maneger Object
- */
+* @brief RTCD操作のRTCのコンストラクタ
+* @param manager マネージャオブジェクト
+*/
 rtcdControl::rtcdControl(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager)
@@ -43,9 +44,10 @@ rtcdControl::rtcdControl(RTC::Manager* manager)
 	m_rtcControl_cpp = new RTCDataInterfaceSVC_impl(manager);
 }
 
+
 /*!
- * @brief destructor
- */
+* @brief  RTCD操作のRTCのデストラクタ
+*/
 rtcdControl::~rtcdControl()
 {
 }
@@ -53,7 +55,10 @@ rtcdControl::~rtcdControl()
 
 
 
-
+/**
+*@brief 初期化処理用コールバック関数
+* @return RTC::ReturnCode_t
+*/
 RTC::ReturnCode_t rtcdControl::onInitialize()
 {
   // Registration: InPort/OutPort/Service
@@ -100,19 +105,31 @@ RTC::ReturnCode_t rtcdControl::onShutdown(RTC::UniqueId ec_id)
 }
 */
 
-
+/**
+*@brief 活性化時のコールバック関数
+* @param ec_id target ExecutionContext Id
+* @return
+*/
 RTC::ReturnCode_t rtcdControl::onActivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 
-
+/**
+*@brief 不活性化時のコールバック関数
+* @param ec_id target ExecutionContext Id
+* @return RTC::ReturnCode_t
+*/
 RTC::ReturnCode_t rtcdControl::onDeactivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 
-
+/**
+*@brief 周期処理用コールバック関数
+* @param ec_id target ExecutionContext Id
+* @return RTC::ReturnCode_t
+*/
 RTC::ReturnCode_t rtcdControl::onExecute(RTC::UniqueId ec_id)
 {
 	/*rtcControl::rtcPathSeq *paths;

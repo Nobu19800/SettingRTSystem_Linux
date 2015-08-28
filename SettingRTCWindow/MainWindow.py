@@ -2,8 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 ##
-#   @file .py
-#   @brief 
+#   @file MainWindow.py
+#   @brief メインウインドウ
 
 
 
@@ -54,6 +54,12 @@ import imp
 import SettingRTCWindow.RTCListWindow
 
 
+
+##
+# @brief サービスポートを接続する関数
+# @param obj1 ポートオブジェクト1
+# @param obj2 ポートオブジェクト2
+# @param c_name コネクタ名
 def connectServicePort(obj1, obj2, c_name):
 
     
@@ -72,14 +78,20 @@ def connectServicePort(obj1, obj2, c_name):
     
 
 
-
+##
+# @class MainWindow
+# @brief メインウインドウ
+#
 class MainWindow(QtGui.QMainWindow):
+    ##
+    # @brief コンストラクタ
+    # @param self 
     def __init__(self):
         super(MainWindow, self).__init__()
 
-	self.setWindowTitle(u"複合コンポーネント作成支援ツール")
-	self.setMinimumWidth(700)
-	
+        self.setWindowTitle(u"複合コンポーネント作成支援ツール")
+        self.setMinimumWidth(700)
+        
         self.tree = None
         
         self.mgr = OpenRTM_aist.Manager.init(sys.argv)
@@ -89,9 +101,9 @@ class MainWindow(QtGui.QMainWindow):
 
 
         filename = "rtcConfSetReq"
-	filepath = ["./rtcConfSetReq"]
-	func = self.getFunc(filename, filepath)
-	func(self.mgr)
+        filepath = ["./rtcConfSetReq"]
+        func = self.getFunc(filename, filepath)
+        func(self.mgr)
         self.control_comp = self.mgr.createComponent(filename)
 
         
@@ -110,21 +122,26 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.tab_widget)
 
         self.createAction()
-	self.createMenus()
-	self.createToolBars()
-	#self.mgrc = ManagerControl("")
-	
-	self.tab_widget_cpp =  None
-	self.tab_widget_python = None
+        self.createMenus()
+        self.createToolBars()
+        #self.mgrc = ManagerControl("")
+        
+        self.tab_widget_cpp =  None
+        self.tab_widget_python = None
 
 
-	
-	self.curFile = ""
-	self.rtcdFlag = False
-	#self.mgrc.CreateComp("MyFirstComponent",[".\\MyFirstComponent"])
+        
+        self.curFile = ""
+        self.rtcdFlag = False
+        #self.mgrc.CreateComp("MyFirstComponent",[".\\MyFirstComponent"])
         #self.mgrc.CreateComp("MyFirstComponent",[".\\MyFirstComponent"])
 
-
+    ##
+    # @brief RTCを検索する
+    # @param self 
+    # @param name RTC名
+    # @param ip IPアドレス
+    # @return RTCのリスト
     def searchRTC(self, name, ip='localhost'):
         ans = []
         
@@ -142,7 +159,11 @@ class MainWindow(QtGui.QMainWindow):
 
         return ans
 
-
+    ##
+    # @brief RTCのツリーからRTCを検索してリストにする
+    # @param self
+    # @param node 現在検索中のノード
+    # @param cl リスト
     def getNode(self, node, cl):
         values = node._children.values()
         for v in values:
@@ -155,18 +176,19 @@ class MainWindow(QtGui.QMainWindow):
                                 
                 self.getNode(v, cl)
         
+    
     ##
-    #アクションの作成の関数
-    ##
+    # @brief アクションの作成の関数
+    # @param self
     def createAction(self):
 
-	self.newAct = QtGui.QAction(QtGui.QIcon(':/images/new.png'),"&New...",self)
-	self.newAct.setShortcuts(QtGui.QKeySequence.New)
+        self.newAct = QtGui.QAction(QtGui.QIcon(':/images/new.png'),"&New...",self)
+        self.newAct.setShortcuts(QtGui.QKeySequence.New)
         self.newAct.triggered.connect(self.newFile)
         
 
 
-	self.openAct = QtGui.QAction(QtGui.QIcon(':/images/open.png'),"&Open...",self)
+        self.openAct = QtGui.QAction(QtGui.QIcon(':/images/open.png'),"&Open...",self)
         self.openAct.setShortcuts(QtGui.QKeySequence.Open)
         self.openAct.triggered.connect(self.open)
 
@@ -185,6 +207,9 @@ class MainWindow(QtGui.QMainWindow):
         self.rtcdAct = QtGui.QAction(QtGui.QIcon(':/images/run.png'),"&rtcd &Start",self)
         self.rtcdAct.triggered.connect(self.rtcdRun)
 
+    ##
+    # @brief タブ削除の関数
+    # @param self
     def deleteTabs(self):
         if self.tab_widget_cpp:
             self.tab_widget.removeTab(self.tab_widget.indexOf(self.tab_widget_cpp))
@@ -196,13 +221,14 @@ class MainWindow(QtGui.QMainWindow):
             self.tab_widget.removeTab(self.tab_widget.indexOf(self.rtclistArea))
             self.rtclistWindow = None
             self.rtclistArea = None
+    
     ##
-    #メニューの作成の関数
-    ##
+    # @brief メニューの作成の関数
+    # @param self
     def createMenus(self):
 
-	self.fileMenu = self.menuBar().addMenu("&File")
-	self.fileMenu.addAction(self.newAct)
+        self.fileMenu = self.menuBar().addMenu("&File")
+        self.fileMenu.addAction(self.newAct)
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addAction(self.saveAct)
         self.fileMenu.addAction(self.saveAsAct)
@@ -210,7 +236,9 @@ class MainWindow(QtGui.QMainWindow):
         
         
         
-
+    ##
+    # @brief ツールバーの作成の関数
+    # @param self
     def createToolBars(self):
         self.fileToolBar = self.addToolBar("File")
         self.fileToolBar.addAction(self.newAct)
@@ -218,6 +246,10 @@ class MainWindow(QtGui.QMainWindow):
         self.fileToolBar.addAction(self.saveAct)
         self.fileToolBar.addAction(self.rtcdAct)
 
+    ##
+    # @brief タブの作成の関数
+    # @param self
+    # @param filapath 読み込むファイル名
     def createTabs(self, filapath):
         ipaddress = str(self.rtcd_widget.WidList["textBox"]["Widget"].text().toLocal8Bit())
         confsetComp = self.searchRTC("rtcConfSet0.rtc",ipaddress)
@@ -297,6 +329,11 @@ class MainWindow(QtGui.QMainWindow):
             
             self.rtclistArea.setWidget(self.rtclistWindow)
 
+    ##
+    # @brief タブの作成の関数
+    # @param self
+    # @param name RTC名
+    # @param type 0でrtcdの起動、1で実行ファイルの起動
     def createComp(self, name, type):
         if self.rtcdFlag == False:
             self.mesBox(u"rtcdを起動していません。\nツールバーのrtcd起動ボタンを押してください。")
@@ -314,7 +351,12 @@ class MainWindow(QtGui.QMainWindow):
                 print tbi
 
     
-
+    ##
+    # @brief RTCの初期化関数を取得
+    # @param self
+    # @param filename ファイル名
+    # @param filepath ファイルパス
+    # @return 初期化関数
     def getFunc(self, filename, filepath):
         try:
             sys.path.append(filepath[0])
@@ -330,6 +372,10 @@ class MainWindow(QtGui.QMainWindow):
                 print tbi
             return None
 
+    ##
+    # @brief ダイアログでファイル選択
+    # @param self
+    # @return ファイルパス
     def getFilePath(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,u"開く","","Config File (*.conf);;All Files (*)")
         if fileName.isEmpty():
@@ -340,9 +386,10 @@ class MainWindow(QtGui.QMainWindow):
 
         return ba
 
+    
     ##
-    #ファイル読み込みスロット
-    ##
+    # @brief ファイル読み込みスロット
+    # @param self
     def open(self):
         
         
@@ -355,7 +402,9 @@ class MainWindow(QtGui.QMainWindow):
         self.curFile = filepath
         
         
-        
+    ##
+    # @brief C++の設定ファイルにGUIの設定を反映
+    # @param self    
     def setDataCpp(self):
         if self.tab_widget_cpp !=  None:
             data = self.tab_widget_cpp.getConfData() 
@@ -368,6 +417,9 @@ class MainWindow(QtGui.QMainWindow):
                 for tbi in tbinfo:
                     print tbi
 
+    ##
+    # @brief Pythonの設定ファイルにGUIの設定を反映
+    # @param self   
     def setDataPy(self):
         if self.tab_widget_python !=  None:
             data = self.tab_widget_python.getConfData() 
@@ -383,7 +435,10 @@ class MainWindow(QtGui.QMainWindow):
 
     
         
-
+    ##
+    # @brief ファイルに保存する
+    # @param self
+    # @param filename ファイル名
     def saveFile(self, filename):
         self.setDataCpp()
         self.setDataPy()
@@ -400,13 +455,20 @@ class MainWindow(QtGui.QMainWindow):
             tbinfo = traceback.format_tb( info[2] )
             for tbi in tbinfo:
                 print tbi
-
+    ##
+    # @brief ファイル保存のスロット
+    # @param self
     def save(self):
         if self.curFile == "":
             return self.saveAs()
         else:
             self.saveFile(self.curFile)
             return True
+
+    ##
+    # @brief パッケージを作成、保存
+    # @param self
+    # @param filename パッケージ名
     def createPack(self, filename):
         try:
             self.control_comp._rtcconf._ptr().createProject(filename)
@@ -415,7 +477,9 @@ class MainWindow(QtGui.QMainWindow):
             tbinfo = traceback.format_tb( info[2] )
             for tbi in tbinfo:
                 print tbi
-                
+    ##
+    # @brief パッケージを作成、保存のスロット
+    # @param self           
     def createPackage(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self,u"保存", "","Config File (*.conf);;All Files (*)")
         if fileName.isEmpty():
@@ -424,21 +488,22 @@ class MainWindow(QtGui.QMainWindow):
 
         self.createPack(ba)
 
+    
     ##
-    #ファイル保存のスロット
-    ##
+    # @brief ファイルを別名で保存のスロット
+    # @param self   
     def saveAs(self):
         
         fileName = QtGui.QFileDialog.getSaveFileName(self,u"保存", "","Config File (*.conf);;All Files (*)")
-	if fileName.isEmpty():
+        if fileName.isEmpty():
             return False
 
-	ba = str(fileName.toLocal8Bit())
-	
+        ba = str(fileName.toLocal8Bit())
+        
         self.saveFile(ba)
         self.curFile = ba
         return True
-	#self.tab_widget_python = None
+        #self.tab_widget_python = None
 
 
         """fname = os.path.basename(ba)
@@ -499,9 +564,10 @@ class MainWindow(QtGui.QMainWindow):
 
 	
 
+    
     ##
-    #初期化のスロット
-    ##
+    # @brief 初期化のスロット
+    # @param self
     def newFile(self):
         text, ok = QtGui.QInputDialog.getText(self, u"IPアドレス入力",
                 u"IPアドレス", QtGui.QLineEdit.Normal,
@@ -512,11 +578,17 @@ class MainWindow(QtGui.QMainWindow):
             self.curFile = ""
         
 
-
+    ##
+    # @brief rtcdを起動する
+    # @param self
     def rtcdRun(self):
         self.rtcd_widget.rtcdSlot()
         self.rtcdFlag = True
 
+    ##
+    # @brief メッセージボックス表示
+    # @param self
+    # @param mes 表示する文字列
     def mesBox(self, mes):
         msgbox = QtGui.QMessageBox( self )
         msgbox.setText( mes )

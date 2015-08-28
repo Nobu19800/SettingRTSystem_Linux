@@ -39,5 +39,5 @@ link_directories(${OMNIORB_LIBRARY_DIRS})
 
 project (rtcd_p)
 
-add_executable (rtcd_p rtcd_p.cpp CompSearch.cpp LoadRTCs.cpp)
+add_executable (rtcd_p rtcd_p.cpp FileStreamFunc.cpp LoadRTCs.cpp)
 target_link_libraries(rtcd_p ${OPENRTM_LIBRARIES})

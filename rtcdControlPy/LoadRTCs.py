@@ -5,7 +5,6 @@
 """
  @file LoadRTCs.py
  @brief LoadRTCs
- @date $Date$
 
 
 """
@@ -20,26 +19,60 @@ import struct
 import imp
 
 
-
+##
+# @brief バイナリファイルから文字列読み込み
+# @param ifs ファイルストリーム
+# @return 文字列
 def ReadString(ifs):
     s = struct.unpack("i",ifs.read(4))[0]
     a = ifs.read(s)
 
     return a
 
+##
+# @class RTC_FinalizeListener
+# @brief RTC終了時のリスナ(未実装)
+# 
+# 
 class RTC_FinalizeListener:
+    ##
+    # @brief コンストラクタ
+    # @param self
+    # @param rtc
+    # @param comp_list
+    #
     def __init__(self, rtc, comp_list):
         self.rtc = rtc
         self.comp_list = comp_list
+
+    ##
+    # @brief コールバック
+    # @param self
+    # @param ec_id
+    # @param ret
+    #
     def callback(self, ec_id, ret):
         print self.rtc,self.comp_list
 
-
+##
+# @class LoadRTCs
+# @brief RTCのロード、起動関連
+# 
+# 
 class LoadRTCs:
+    ##
+    # @brief コンストラクタ
+    # @param self
+    # @param mgr マネージャオブジェクト
+    # 
     def __init__(self, mgr):
         self.mgr = mgr
         self.compList = {}
 
+    ##
+    # @brief ファイルを開いてRTCを起動
+    # @param self
+    # 
     def openFile(self):
         prop = OpenRTM_aist.Manager.instance().getConfig()
         value = ""
@@ -51,14 +84,20 @@ class LoadRTCs:
                 m = struct.unpack("i",f.read(4))[0]
                 for i in range(0,m):
                     name = ReadString(f).replace("\0","")
-                    filename = ReadString(f).replace("\0","")
                     d = struct.unpack("i",f.read(4))[0]
                     path = ReadString(f).replace("\0","")
                     dir = ReadString(f).replace("\0","")
                     for j in range(0,d):
-                        self.createComp(name,filename,dir)
+                        self.createComp(name,dir)
                 f.close()
 
+    ##
+    # @brief rtc.confの設定を取得する関数
+    # @param self
+    # @param prop プロパティ
+    # @param key キー
+    # @param value 値
+    # @return 値
     def getProperty(self, prop, key, value):
         
         if  prop.findNode(key) != None:
@@ -66,14 +105,20 @@ class LoadRTCs:
             value = prop.getProperty(key)
         return value
 
-    def createComp(self, name, filename, filepath):
+    ##
+    # @brief RTCを起動
+    # @param self
+    # @param filename RTC名
+    # @param filepath ファイルパス
+    # @return 成功でTrue、失敗でFalse
+    def createComp(self, filename, filepath):
         self.updateCompList()
         filepath = os.path.relpath(filepath)
         
         preLoadComp = None
-        if self.compList.has_key(name):
-            func = self.compList[name]["func"]
-            preLoadComp = self.compList[name]
+        if self.compList.has_key(filename):
+            func = self.compList[filename]["func"]
+            preLoadComp = self.compList[filename]
             
         
                 
@@ -98,10 +143,10 @@ class LoadRTCs:
                 preLoadComp["compList"].append({"component":comp,"callback_func":callback_func})
             else:
                 
-                self.compList[name] = {"name":name,"filename":filename,"filepath":filepath,"func":func,"compList":[]}
+                self.compList[filename] = {"filename":filename,"filepath":filepath,"func":func,"compList":[]}
 
-                callback_func = RTC_FinalizeListener(comp,self.compList[name])
-                self.compList[name]["compList"].append({"component":comp,"callback_func":callback_func})
+                callback_func = RTC_FinalizeListener(comp,self.compList[filename])
+                self.compList[filename]["compList"].append({"component":comp,"callback_func":callback_func})
 
             
             #comp.addPostComponentActionListener(OpenRTM_aist.PostComponentActionListenerType.POST_ON_FINALIZE, callback_func.callback)
@@ -111,20 +156,26 @@ class LoadRTCs:
         return True
     
         
-        
-    def removeComp(self, name):
+    ##
+    # @brief RTCを終了
+    # @param self
+    # @param filename RTC名
+    # @return 成功でTrue、失敗でFalse    
+    def removeComp(self, filename):
         self.updateCompList()
-        if self.compList.has_key(name):
-            if len(self.compList[name]["compList"]) != 0:
-                self.compList[name]["compList"][-1]["component"].exit()
-                del self.compList[name]["compList"][-1]
+        if self.compList.has_key(filename):
+            if len(self.compList[filename]["compList"]) != 0:
+                self.compList[filename]["compList"][-1]["component"].exit()
+                del self.compList[filename]["compList"][-1]
             else:
                 return False
         else:
             return False
         return True
         
-
+    ##
+    # @brief 起動中のRTCのリストを更新(終了している場合はリストから削除)
+    # @param self
     def updateCompList(self):
         pass
         for i,c in self.compList.items():
@@ -136,7 +187,10 @@ class LoadRTCs:
                 
                 
         
-
+    ##
+    # @brief 起動中のRTCのリスト取得
+    # @param self
+    # @return (True、RTCのリスト)
     def getCompList(self):
         import rtcControl
         self.updateCompList()
@@ -146,13 +200,19 @@ class LoadRTCs:
             
             if len(c["compList"]) != 0:
                 
-                data = rtcControl.RTC_Data(c["name"],c["filename"],len(c["compList"]))
+                data = rtcControl.RTC_Data(c["filename"],len(c["compList"]))
                 
                 names.append(data)
             
                     
         return (True,names)
 
+    ##
+    # @brief RTC初期化関数を取得
+    # @param self
+    # @param filename ファイル名
+    # @param filepath ディレクトリパス
+    # @return 初期化関数
     def getFunc(self, filename, filepath):
         try:
             sys.path.append(filepath)

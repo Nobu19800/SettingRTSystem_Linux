@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 # -*- Python -*-
 
-"""
- @file rtcConfSetReq.py
- @brief rtcConfSetReq
- @date $Date$
+##
+#   @file rtcConfSetReq.py
+#   @brief RTC設定ファイル操作RTC(コンシュマー側)
 
-
-"""
 import sys
 import time
 sys.path.append(".")
@@ -49,19 +46,20 @@ rtcconfsetreq_spec = ["implementation_id", "rtcConfSetReq",
 
 ##
 # @class rtcConfSetReq
-# @brief rtcConfSetReq
+# @brief RTC設定ファイル操作RTC(コンシュマー側)
 # 
 # 
 class rtcConfSetReq(OpenRTM_aist.DataFlowComponentBase):
 	
 	##
-	# @brief constructor
-	# @param manager Maneger Object
+	# @brief コンストラクタ
+	# @param self
+	# @param manager マネージャオブジェクト
 	# 
 	def __init__(self, manager):
 		OpenRTM_aist.DataFlowComponentBase.__init__(self, manager)
 
-                
+		        
 		"""
 		"""
 		self._rtcconfPort = OpenRTM_aist.CorbaPort("rtcconf")
@@ -78,15 +76,11 @@ class rtcConfSetReq(OpenRTM_aist.DataFlowComponentBase):
 		# </rtc-template>
 
         
-		 
+
 	##
-	#
-	# The initialize action (on CREATED->ALIVE transition)
-	# formaer rtc_init_entry() 
-	# 
+	# @brief 初期化処理用コールバック関数
+	# @param self 
 	# @return RTC::ReturnCode_t
-	# 
-	#
 	def onInitialize(self):
 		# Bind variables and configuration variable
 		
@@ -112,7 +106,7 @@ class rtcConfSetReq(OpenRTM_aist.DataFlowComponentBase):
 	#	# @return RTC::ReturnCode_t
 	#
 	#	# 
-	#def onFinalize(self, ec_id):
+	#def onFinalize(self):
 	#
 	#	return RTC.RTC_OK
 	
@@ -144,64 +138,54 @@ class rtcConfSetReq(OpenRTM_aist.DataFlowComponentBase):
 	#
 	#	return RTC.RTC_OK
 	
-		##
-		#
-		# The activated action (Active state entry action)
-		# former rtc_active_entry()
-		#
-		# @param ec_id target ExecutionContext Id
-		# 
-		# @return RTC::ReturnCode_t
-		#
-		#
+	##
+	# @brief 活性化処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onActivated(self, ec_id):
 	
 		return RTC.RTC_OK
 	
-		##
-		#
-		# The deactivated action (Active state exit action)
-		# former rtc_active_exit()
-		#
-		# @param ec_id target ExecutionContext Id
-		#
-		# @return RTC::ReturnCode_t
-		#
-		#
+	##
+	# @brief 不活性化処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onDeactivated(self, ec_id):
 	
 		return RTC.RTC_OK
 	
-		##
-		#
-		# The execution action that is invoked periodically
-		# former rtc_active_do()
-		#
-		# @param ec_id target ExecutionContext Id
-		#
-		# @return RTC::ReturnCode_t
-		#
-		#
+	##
+	# @brief 周期処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onExecute(self, ec_id):
-                
-                """try:
-                        self._rtcconf._ptr().open("./test.txt")
-                        #print self._rtcconf._ptr().getDataSeq_Cpp()
-                        self._rtcconf._ptr().startRTCD_Cpp()
-                        self._rtcconf._ptr().startRTCD_Py()
-                        print self._rtcconf._ptr().getData_Cpp("corba.nameservers")
-                        #self._rtcconf._ptr().setData_Cpp(RTCConfData.confData("corba.nameservers","test"))
-                except:
-                        pass"""
-                
+		
+		"""try:
+			self._rtcconf._ptr().open("./test.txt")
+			#print self._rtcconf._ptr().getDataSeq_Cpp()
+			self._rtcconf._ptr().startRTCD_Cpp()
+			self._rtcconf._ptr().startRTCD_Py()
+			print self._rtcconf._ptr().getData_Cpp("corba.nameservers")
+			#self._rtcconf._ptr().setData_Cpp(RTCConfData.confData("corba.nameservers","test"))
+		except:
+			pass"""
+		
 		return RTC.RTC_OK
 
+	##
+	# @brief 辞書オブジェクトからRTCConfData.confDataに変換
+	# @param self 
+	# @param datas 辞書(name:名前、value:値)のリスト
+	# @return RTCConfData.confDataのリスト
 	def convConfData(self, datas):
-                confData = []
-                
-                for d in datas:
-                        confData.append(RTCConfData.confData(d["name"], d["value"]))
-                return confData
+		confData = []
+		
+		for d in datas:
+			confData.append(RTCConfData.confData(d["name"], d["value"]))
+		return confData
 	#	##
 	#	#
 	#	# The aborting action when main logic error occurred.

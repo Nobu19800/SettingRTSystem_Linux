@@ -1,6 +1,12 @@
-﻿#include <coil/File.h>
+﻿/*!
+* @file  FileStreamFunc.cpp
+* @brief ファイル操作関連の関数
+*
+*/
 
-#include "CompSearch.h"
+#include <coil/File.h>
+
+#include "FileStreamFunc.h"
 
 
 using namespace RTC;
@@ -8,7 +14,11 @@ using namespace std;
 
 
 
-
+/**
+*@brief バイナリファイルに文字保存する関数
+*@param a 保存する文字列
+*@param ofs ファイルストリーム
+*/
 void WriteString(string a, ofstream &ofs)
 {
 	int s = a.size()+1;
@@ -16,6 +26,12 @@ void WriteString(string a, ofstream &ofs)
 	ofs.write( a.c_str(), s );
 }
 
+/**
+*@brief バイナリファイルに文字保存する関数
+*@param a 文字列
+*@param ofs ファイルストリーム
+* @return 読み込んだ文字列
+*/
 string ReadString(ifstream &ifs)
 {
 	string a;
@@ -33,6 +49,10 @@ string ReadString(ifstream &ifs)
 }
 
 
+/**
+*@brief 指定パスのファイル名、本体名、拡張子、ディレクトリパスを取得するクラスのコンストラクタ
+* @param path パス
+*/
 PathList::PathList(std::string path)
 {
 	fname = coil::basename(path.c_str());

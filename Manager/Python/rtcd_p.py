@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # -*- Python -*-
 
 
@@ -9,6 +10,9 @@ import OpenRTM_aist
 
 import LoadRTCs
 
+##
+# @brief メイン関数
+#
 def main():
   manager = OpenRTM_aist.Manager.init(sys.argv)
 

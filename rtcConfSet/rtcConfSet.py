@@ -5,7 +5,6 @@
 """
  @file rtcConfSet.py
  @brief rtcConfSet
- @date $Date$
 
 
 """
@@ -64,7 +63,11 @@ import rtcControl, rtcControl__POA
 
 from wasanbon.core.rtc.rtcprofile import RTCProfile
 
-
+##
+# @brief サービスポート接続
+# @param obj1 ポートオブジェクト1
+# @param obj2 ポートオブジェクト2
+# @param c_name コネクタの名前
 def connectServicePort(obj1, obj2, c_name):
 
     obj1.disconnect_all()
@@ -77,18 +80,21 @@ def connectServicePort(obj1, obj2, c_name):
 
     ret = obj2.connect(conprof)
 
+
 ##
-#バイナリファイルより文字読み込みする関数
-##
+# @brief バイナリファイルより文字読み込みする関数
+# @param ifs ファイルストリーム
 def ReadString(ifs):
     s = struct.unpack("i",ifs.read(4))[0]
     a = ifs.read(s)
 
     return a
 
+
 ##
-#バイナリファイルに文字保存する関数
-##
+# @brief バイナリファイルに文字保存する関数
+# @param a 文字列
+# @param ofs ファイルストリーム
 def WriteString(a, ofs):
     
     a2 = a + "\0"
@@ -99,13 +105,22 @@ def WriteString(a, ofs):
     
     ofs.write(a2)
 
+##
+# @brief ファイル検索
+# @param root ディレクトリパス
+# @param filename ファイル名
+# @return 検索語のリスト
 def getUseDll(root, filename):
     nameList = []
     for name in glob.glob(os.path.join(root,filename)):
         nameList.append(name)
     return nameList
 
-
+##
+# @brief ファイル検索
+# @param name ファイル名
+# @param dir ディレクトリパス
+# @return ファイルパス
 def searchFile(name, dir):
     wk = os.walk(dir)
     for i in wk:
@@ -115,7 +130,10 @@ def searchFile(name, dir):
                 return filepath
     return ""
 
-
+##
+# @brief ファイルのリストを取得
+# @param dir ディレクトリパス
+# @return ファイルパスのリスト
 def getDirList(dir):
     ans = []
     files = os.listdir(dir)
@@ -126,20 +144,43 @@ def getDirList(dir):
     return ans
 
 
-
+##
+# @brief 文字列をUnicodeに変換
+# @param s 変換前の文字列
+# @return 変換後の文字列
 def decodestr(s):
     if isinstance(s, str):
         return s.decode('utf-8')
     return s
+
+##
+# @brief Unicode文字列をutf-8に変換
+# @param s 変換前の文字列
+# @return 変換後の文字列
 def encodestr(s):
     if not isinstance(s, str):
         return s.encode('utf-8')
     return s
 
+##
+# @class RTComponentProfile
+# @brief RTCプロファイルの取得等
+# 
+# 
 class RTComponentProfile():
+    ##
+    # @brief コンストラクタ
+    # @param self
+    # 
     def __init__(self):
         self.compPath = "../Components"
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.basicInfo.docをRTCConfData.BasicInfo_Docに変換
+    # @param self
+    # @param doc 基本情報のドキュメント
+    # @return 変換後のドキュメントオブジェクト
+    # 
     def setBasicInfo_doc(self, doc):
         reference = self.getKeyItem(doc,"rtcDoc:reference")
         license = self.getKeyItem(doc,"rtcDoc:license")
@@ -149,6 +190,12 @@ class RTComponentProfile():
         description = self.getKeyItem(doc,"rtcDoc:description")
         return RTCConfData.BasicInfo_Doc(reference,license,creator,algorithm,inouts,description)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.basicInfoをRTCConfData.BasicInfoに変換
+    # @param self
+    # @param rp RTCプロファイル
+    # @return 変換後の基本情報オブジェクト
+    # 
     def setBasicInfo(self, rp):
         type = self.getKeyItem(rp.basicInfo,"xsi:type")
         saveProject = self.getKeyItem(rp.basicInfo,"rtcExt:saveProject")
@@ -170,12 +217,24 @@ class RTComponentProfile():
         return RTCConfData.BasicInfo(type,saveProject,updateDate,creationDate,abstracts,version,vendor,maxInstances,executionType,executionRate,description,category,componentKind,activityType,componentType,name,doc)
         
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.actions.On～をRTCConfData.Actionに変換
+    # @param self
+    # @param status アクションコールバック
+    # @return 変換後のアクションオブジェクト
+    # 
     def setAction(self, status):
         type = self.getKeyItem(status,"xsi:type")
         implemented = decodestr(status.implemented)
 
         return RTCConfData.Action(type, implemented)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.actionsをRTCConfData.Actionsに変換
+    # @param self
+    # @param rp RTCプロファイル
+    # @return 変換後のアクティビティオブジェクト
+    # 
     def setActions(self, rp):
         OnInitialize = self.setAction(rp.actions.OnInitialize)
         OnFinalize = self.setAction(rp.actions.OnFinalize)
@@ -194,6 +253,12 @@ class RTComponentProfile():
 
         return RTCConfData.Actions(OnInitialize,OnFinalize,OnStartup,OnShutdown,OnActivated,OnDeactivated,OnAborting,OnError,OnReset,OnExecute,OnStateUpdate,OnRateChanged,OnAction,OnModeChanged)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.configurations[i].docをRTCConfData.Configuration_Docに変換
+    # @param self
+    # @param doc コンフィギュレーションのドキュメント
+    # @return 変換後のドキュメントオブジェクト
+    # 
     def setConfiguration_Doc(self, doc):
         constraint = self.getKeyItem(doc,"rtcDoc:constraint")
         range = self.getKeyItem(doc,"rtcDoc:range")
@@ -203,11 +268,23 @@ class RTComponentProfile():
         dataname = self.getKeyItem(doc,"rtcDoc:dataname")
         return RTCConfData.Configuration_Doc(constraint,range,unit,description,defaultValue,dataname)
 
+    ##
+    # @brief 名前、値が空のRTCConfData.Configuration_Propertiesを返す
+    # @param self
+    # @param conf コンフィギュレーション
+    # @return コンフィギュレーションプロパティオブジェクト
+    # 
     def setConfiguration_Properties(self, conf):
         value = u""
         name = u""
         return RTCConfData.Configuration_Properties(value,name)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.configurationsをRTCConfData.Configurationに変換
+    # @param self
+    # @param conf コンフィギュレーション
+    # @return 変換後のコンフィギュレーションオブジェクト
+    # 
     def setConfiguration(self, conf):
         type = self.getKeyItem(conf,"xsi:type")
         variableName = self.getKeyItem(conf,"rtcExt:variableName")
@@ -220,6 +297,12 @@ class RTComponentProfile():
 
         return RTCConfData.Configuration(type,variableName,unit,defaultValue,dataType,name,property,doc)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.dataports[i].docをRTCConfData.DataPort_Docに変換
+    # @param self
+    # @param doc データポートのドキュメント
+    # @return 変換後のドキュメントオブジェクト
+    #
     def setDataPort_Doc(self, doc):
         operation = self.getKeyItem(doc,"rtcDoc:operation")
         occerrence = self.getKeyItem(doc,"rtcDoc:occerrence")
@@ -230,6 +313,12 @@ class RTComponentProfile():
         description = self.getKeyItem(doc,"rtcDoc:description")
         return RTCConfData.DataPort_Doc(operation,occerrence,unit,semantics,number,type,description)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.dataports[i]をRTCConfData.Configurationに変換
+    # @param self
+    # @param dp データポート
+    # @return 変換後のデータポートオブジェクト
+    # 
     def setDataPort(self, dp):
         type = self.getKeyItem(dp,"xsi:type")
         position = self.getKeyItem(dp,"rtcExt:position")
@@ -246,6 +335,12 @@ class RTComponentProfile():
 
         return RTCConfData.DataPort(type,position,variableName,unit,subscriptionType,dataflowType,interfaceType,idlFile,datatype,name,portType,doc)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.serviceports[i].serviceInterfaces[j].docをRTCConfData.ServiceInterface_Docに変換
+    # @param self
+    # @param doc サービスポートインターフェースのドキュメント
+    # @return 変換後のドキュメントオブジェクト
+    #
     def setServiceInterface_Doc(self, doc):
         docPostCondition = self.getKeyItem(doc,"rtcDoc:docPostCondition")
         docPreCondition = self.getKeyItem(doc,"rtcDoc:docPreCondition")
@@ -256,6 +351,12 @@ class RTComponentProfile():
 
         return RTCConfData.ServiceInterface_Doc(docPostCondition,docPreCondition,docException,docReturn,docArgument,description)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.serviceports[i].serviceInterfaces[j]をRTCConfData.ServiceInterfaceに変換
+    # @param self
+    # @param interface サービスポートインターフェース
+    # @return 変換後のサービスポートインターフェースオブジェクト
+    # 
     def setServiceInterface(self, interface):
         type = self.getKeyItem(interface,"xsi:type")
         variableName = self.getKeyItem(interface,"rtcExt:variableName")
@@ -270,6 +371,12 @@ class RTComponentProfile():
 
         return RTCConfData.ServiceInterface(type,variableName,path,interfeceType,idlFile,instanceName,direction,name,doc)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.serviceports[i].docをRTCConfData.ServicePort_Docに変換
+    # @param self
+    # @param doc サービスポートのドキュメント
+    # @return 変換後のドキュメントオブジェクト
+    #
     def setServicePort_Doc(self, doc):
         ifdescription = self.getKeyItem(doc,"rtcDoc:ifdescription")
         description = self.getKeyItem(doc,"rtcDoc:description")
@@ -277,6 +384,12 @@ class RTComponentProfile():
 
         return RTCConfData.ServicePort_Doc(ifdescription,description)
 
+    ##
+    # @brief wasanbon.core.rtc.rtcprofile.RTCProfile.serviceports[i]をRTCConfData.ServicePortに変換
+    # @param self
+    # @param sp サービスポート
+    # @return 変換後のサービスポートオブジェクト
+    # 
     def setServicePort(self, sp):
         type = self.getKeyItem(sp,"xsi:type")
         position = self.getKeyItem(sp,"rtcExt:position")
@@ -292,10 +405,23 @@ class RTComponentProfile():
 
         return RTCConfData.ServicePort(type,position,name,interfaces,doc)
 
+    ##
+    # @brief コンポーネント保存フォルダ内の指定フォルダからファイルを検索
+    # @param self
+    # @param dirname 検索するフォルダ
+    # @param filename ファイル名
+    # @return ファイルパス
+    # 
     def getFile(self, dirname, filename):
         filename = searchFile(filename,os.path.join(self.compPath,dirname))
         return filename
-    
+
+    ##
+    # @brief コンポーネント保存フォルダ内の指定フォルダからXMLファイルを検索、RTCプロファイルを取得
+    # @param self
+    # @param name 検索するフォルダ
+    # @return RTCプロファイル
+    # 
     def getProfile(self, name):
         filename = searchFile("RTC.xml",os.path.join(self.compPath,name))
         ans = True
@@ -327,12 +453,29 @@ class RTComponentProfile():
 
         return (ans, RTCConfData.RTC_Profile(name,version,id,language,info,act,confs,dports,sports))
 
+    ##
+    # @brief 未実装
+    # @param self
+    # @param name 
+    # @return 
+    # 
     def createComp(self, name):
         return True
 
+    ##
+    # @brief 未実装
+    # @param self
+    # @param name 
+    # @return 
+    # 
     def removeComp(self, name):
         return True
 
+    ##
+    # @brief RTC保存フォルダ内の全てのRTCプロファイルを取得
+    # @param self
+    # @return (成功でTrue失敗でFalse、プロファイルリスト)
+    # 
     def getProfileList(self):
         profileList = []
         dirs = getDirList(self.compPath)
@@ -345,7 +488,13 @@ class RTComponentProfile():
         return (True, profileList)
 
     
-
+    ##
+    # @brief オブジェクトから指定したキーの値を取得
+    # @param self
+    # @param obj オブジェクト
+    # @param key キー
+    # @return 値
+    # 
     def getKeyItem(self, obj, key):
         
         if key in obj.keys():
@@ -355,13 +504,22 @@ class RTComponentProfile():
 
 
     
-
+##
+# @class ConfDataInterface_i
+# @brief RTC設定ファイル操作インターフェース
+# 
+# 
 class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     """
     @class ConfDataInterface_i
     Example class implementing IDL interface RTCConfData.ConfDataInterface
     """
 
+    ##
+    # @brief コンストラクタ
+    # @param self
+    # @param comp rtcConfSetコンポーネント
+    # 
     def __init__(self, comp):
         """
         @brief standard constructor
@@ -385,6 +543,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         self.runRTCList = {}        
 
+    ##
+    # @brief 設定ファイルをロードする関数
+    # @param self
+    # @param filename ファイル名
+    # @return　成功でTrue、失敗でFalse
+    # 
     def open(self, filename):
         if filename != "rtc.conf":
             if not os.path.exists(filename):
@@ -431,6 +595,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         return True
 
+    ##
+    # @brief ファイル名からホームフォルダ、C++、Pythonの設定ファイルを設定する関数
+    # @param self
+    # @param filename ファイル名
+    # @return　(ホームディレクトリ、ファイル名、C++のディレクトリ、Pythonのディレクトリ)
+    # 
     def setFolder(self, filename):
         if filename == "rtc.conf":
             dname = ""
@@ -464,6 +634,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         self.home_dirname = dname
         return (dname, fname, self.cppDirName, self.pyDirName)
 
+    ##
+    # @brief 指定したパスのRTCを取得
+    # @param self
+    # @param name RTCのパス
+    # @return　RTCオブジェクト
+    # 
     def getComp(self, name):
         path = ['/', 'localhost']
         nlist = name.split("/")
@@ -479,7 +655,13 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         
         
-
+    ##
+    # @brief 各RTCのコンフィギュレーション設定ファイル保存
+    # @param self
+    # @param comp RTCオブジェクト
+    # @param filePath コンフィギュレーション設定ファイル
+    # @param rtcconffile rtc.confのファイルストリーム
+    # 
     def saveConfigFile(self, comp ,filePath, rtcconffile):
         name = comp.name.split(".")[0]
         name = comp.category + "." + name
@@ -517,6 +699,19 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         f.close()
 
+    ##
+    # @brief 各RTCのコンフィギュレーション設定ファイル保存
+    # rtshellのrtcryo.pyのfreeze_dry関数を一部改編(LGPL3)
+    # https://github.com/gbiggs/rtshell/blob/master/rtshell/rtcryo.py
+    # @param self
+    # @param dest ファイル名
+    # @param xml このプログラム内では常にtrue
+    # @param abstract 概要
+    # @param vendor　作者
+    # @param sysname システム名
+    # @param version バージョン
+    # @param components コンポーネントのリスト
+    # 
     def freeze_dry(self, dest='-', xml=True, abstract='', vendor='', sysname='',
         version='', components=[]):
 
@@ -561,6 +756,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             f.close()
             
 
+    ##
+    # @brief RTCと接続している全RTCを取得
+    # @param self 
+    # @param comp RTCオブジェクト
+    # @param clist 接続しているRTCのリスト
+    # 
     def getConnectRTCs(self, comp, clist):
         for l in clist:
             if comp.instance_name == l.instance_name:
@@ -586,6 +787,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                             self.getConnectRTCs(cn_comp,clist)
                             #clist.append(cn_comp)
 
+    ##
+    # @brief 入力されたパスからRTC名を削除して出力
+    # @param self 
+    # @param path RTCのパス
+    # @return RTC名削除後のパス
+    # 
     def getDirName(self, path):
         ans = ""
         nlist = path.split("/")
@@ -596,7 +803,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         return ans
         
-        
+    ##
+    # @brief 複合コンポーネントの子コンポーネントのリストを取得
+    # @param self 
+    # @param comp 複合コンポーネント
+    # @return 子コンポーネントの名前のリスト
+    #     
     def getMembersName(self, comp):
         nlist = []
         for k,v in comp.members.items():
@@ -606,7 +818,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                     if p.name == "naming.names":
                         nlist.append(p.value.value())
         return nlist
-                        
+
+    ##
+    # @brief 複合コンポーネントをどのrtcdから起動するかを判定
+    # 1つでもC++のRTCがある場合はC++のrtcd、それ以外はPythonのrtcd
+    # @param self 
+    # @param comp 複合コンポーネント
+    # @return 言語
+    #                      
     def judgeLanguage(self, comp):
         for k,v in comp.members.items():
             for c in v:
@@ -616,14 +835,26 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                         if p.value.value() != "Python":
                             return "C++"
         return "Python"
-    
+
+    ##
+    # @brief 複合コンポーネントをC++とPythonに分類
+    # @param self 
+    # @param comps 複合コンポーネントのリスト
+    # @return (C++:C++のrtcdで起動する複合コンポーネントのリスト、Python:Pythonのrtcdで起動する複合コンポーネントのリスト)
+    #  
     def judgeLanguageComps(self, comps):
         nlist = {"C++":[],"Python":[]}
         for comp in comps:
             lang = self.judgeLanguage(comp)
             nlist[lang].append(comp)
         return nlist
-            
+
+    ##
+    # @brief 各種設定を保存
+    # @param self 
+    # @param filename ファイル名(ファイル名と同じフォルダ内に各種ファイルを保存)
+    # @return 成功でTrue、失敗でFalse
+    #      
     def save(self, filename):
         filename = os.path.abspath(filename)
         self.tree = rtctree.tree.RTCTree(servers='localhost', orb=self.comp._manager.getORB())        
@@ -813,6 +1044,16 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         
         return True
+
+    ##
+    # @brief RTCの操作をするスクリプトファイルを生成
+    # @param self 
+    # @param home_dirname ホームディレクトリ
+    # @param components コンポーネントのリスト
+    # @param filename 保存ファイル名
+    # @param cmdName コマンド名
+    # @param allCompFlag Falseの場合は複合コンポーネントの子コンポーネントに指定コマンドを実行しない
+    # 
     def saveControlRTCFile(self, home_dirname, components, filename, cmdName, allCompFlag=False):
         
         if os.name == 'posix':
@@ -862,15 +1103,39 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
 
         f.close()
-        
+
+    ##
+    # @brief RTCの活性化をするスクリプトファイルを生成
+    # @param self 
+    # @param home_dirname ホームディレクトリ
+    # @param components コンポーネントのリスト
+    #    
     def saveActiveFile(self, home_dirname, components):
         self.saveControlRTCFile(home_dirname,components,"active","rtact")
-        
+
+    ##
+    # @brief RTCの不活性化をするスクリプトファイルを生成
+    # @param self 
+    # @param home_dirname ホームディレクトリ
+    # @param components コンポーネントのリスト
+    #        
     def saveDeactiveFile(self, home_dirname, components):
         self.saveControlRTCFile(home_dirname,components,"deactive","rtdeact")
+
+    ##
+    # @brief RTCの終了するスクリプトファイルを生成
+    # @param self 
+    # @param home_dirname ホームディレクトリ
+    # @param components コンポーネントのリスト
+    #       
     def saveExitFile(self, home_dirname, components):
         self.saveControlRTCFile(home_dirname,components,"exit","rtexit",True)
 
+    ##
+    # @brief スクリプトファイルの先頭にスクリプトファイルのフォルダに移動するコマンドを記述
+    # @param self 
+    # @param f ファイルストリーム
+    #       
     def writeFileOption(self, f):
         if os.name == 'posix':
             f.write("#!/bin/sh\n")
@@ -880,7 +1145,16 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             f.write("cd `dirname $0`\n")
         elif os.name == 'nt':
             f.write("cd /d %~dp0\n")
-            
+
+    ##
+    # @brief 各種スクリプトファイル(RTC起動、システム復元、活性化、不活性化、終了、複合コンポーネント作成)を生成
+    # @param self 
+    # @param home_dirname ホームディレクトリ
+    # @param cpp_dirname C++のrtcd関連の各種ファイルの保存フォルダ名
+    # @param py_dirname Pythonのrtcd関連の各種ファイルの保存フォルダ名
+    # @param sysfileName システムファイル名
+    # @param compositeList 複合コンポーネントのリスト
+    #          
     def saveBatFile(self, home_dirname, cpp_dirname, py_dirname, sysfileName, compositeList):
         if os.name == 'posix':
             fname = home_dirname+"/start.sh"
@@ -1024,7 +1298,13 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         frtsystem.close()
         
         
-
+    ##
+    # @brief 設定ファイルの各種設定を取得
+    # @param self 
+    # @param filename 設定ファイル名
+    # @param prop OpenRTM_aist.Properties()
+    # @param defFile filenameが存在しない場合に読み込むファイル
+    # @return 名前、値のリスト
     def getConfData(self, filename, prop, defFile):
         prop.setDefaults(OpenRTM_aist.default_config)
         
@@ -1034,7 +1314,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         else:
             fd = file(filename,"r")
             #print filename
-	#print fd
+        #print fd
         prop.load(fd)
         fd.close()
 
@@ -1047,13 +1327,25 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         return confList
 
+    ##
+    # @brief C++の設定ファイルの各種設定を取得
+    # @param self 
+    # @return (True,名前・値のリスト)
     def getDataSeq_Cpp(self):
             return (True,self.confList_cpp)
 
+    ##
+    # @brief Pythonの設定ファイルの各種設定を取得
+    # @param self 
+    # @return (True,名前・値のリスト)
     def getDataSeq_Py(self):
             return (True,self.confList_py)
         
-    # boolean getConfData(in string filename, out confDataSeq data)
+    ##
+    # @brief C++の設定ファイルの各種設定を取得
+    # @param self
+    # @param filename ファイル名
+    # @return (True,名前・値のリスト)
     def setConfData_Cpp(self, filename):
         self.conf_filepath_cpp = filename
         self.prop_cpp  = OpenRTM_aist.Properties()
@@ -1065,6 +1357,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         # *** Implement me
         # Must return: result, data
 
+    ##
+    # @brief Pythonの設定ファイルの各種設定を取得
+    # @param self
+    # @param filename ファイル名
+    # @return (True,名前・値のリスト)
     def setConfData_Py(self, filename):
         self.conf_filepath_py = filename
         self.prop_py  = OpenRTM_aist.Properties()
@@ -1073,6 +1370,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         return (True,self.confList_py)
 
+    ##
+    # @brief プロパティから指定したキーの値を取得
+    # @param self
+    # @param name キー
+    # @param prop プロパティ
+    # @return 値
     def getParam(self, name, prop):
         param = self.getProperty(prop, name, "")
         p = [param]
@@ -1082,9 +1385,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     
     
 
+    
     ##
-    #rtc.confの設定を取得する関数
-    ##
+    # @brief rtc.confの設定を取得する関数
+    # @param self
+    # @param prop プロパティ
+    # @param key キー
+    # @param value 値
+    # @return 値
     def getProperty(self, prop, key, value):
         
         if  prop.findNode(key) != None:
@@ -1092,18 +1400,33 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             value = prop.getProperty(key)
         return value
 
+    ##
+    # @brief 未実装
+    # @param self
+    # @param filepath 
+    # @return True
     def addModule_Cpp(self, filepath):
         return True
+    ##
+    # @brief 未実装
+    # @param self
+    # @param filepath 
+    # @return True
     def addModule_Py(self, filepath):
         return True
-    # boolean setData(in confData data)
+
+    ##
+    # @brief C++のrtcdのrtc.confの設定を上書き
+    # @param self
+    # @param data 設定の名前、値
+    # @return 上書きした場合はTrue、新規の追加した場合はFalse
     def setData_Cpp(self, data):
         
         for d in range(0,len(self.confList_cpp)):
             if self.confList_cpp[d].id == data.id:
                 self.confList_cpp[d] = data
                 
-                #return True
+                return True
 
         
         self.confList_cpp.append(data)
@@ -1114,6 +1437,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         # *** Implement me
         # Must return: result
 
+    ##
+    # @brief Pythonのrtcdのrtc.confの設定を上書き
+    # @param self
+    # @param data 設定の名前、値
+    # @return 上書きした場合はTrue、新規の追加した場合はFalse
     def setData_Py(self, data):
         for d in range(0,len(self.confList_py)):
             if self.confList_py[d].id == data.id:
@@ -1130,12 +1458,22 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         # *** Implement me
         # Must return: result
 
+    ##
+    # @brief C++のrtcdのrtc.confの設定を取得
+    # @param self
+    # @param name 取得する設定の名前
+    # @return (取得でできた場合はTrue・できない場合はFalse、名前・値)
     def getData_Cpp(self, name):
         for d in self.confList_cpp:
             if d.id == name:
                 return (True, d)
         return (False,RTCConfData.confData("",""))
 
+    ##
+    # @brief Pythonのrtcdのrtc.confの設定を取得
+    # @param self
+    # @param name 取得する設定の名前
+    # @return (取得でできた場合はTrue・できない場合はFalse、名前・値)
     def getData_Py(self, name):
         for d in self.confList_py:
             if d.id == name:
@@ -1143,7 +1481,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         return (False,RTCConfData.confData("",""))
     
 
-    # boolean setDataSeq(in confDataSeq data)
+    ##
+    # @brief C++のrtcdのrtc.confの全設定を入力
+    # @param self
+    # @param data 設定データのリスト
+    # @return True
     def setDataSeq_Cpp(self, data):
         self.confList_cpp = data
         return True
@@ -1151,11 +1493,22 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         # *** Implement me
         # Must return: result
 
+    ##
+    # @brief Pythonのrtcdのrtc.confの全設定を入力
+    # @param self
+    # @param data 設定データのリスト
+    # @return True
     def setDataSeq_Py(self, data):
         self.confList_py = data
         return True
 
 
+    ##
+    # @brief RTCツリーからRTC、マネージャのリストを作成
+    # @param self
+    # @param node 現在のノード
+    # @param cl RTCのリスト
+    # @param ml マネージャのリスト
     def getNode(self, node, cl, ml):
         #values = node._children.values()
         values = node.children
@@ -1169,6 +1522,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                                     
                 self.getNode(v, cl, ml)
 
+    ##
+    # @brief 指定した名前のオブジェクトを取得
+    # @param self
+    # @param name 名前
+    # @param cl オブジェクトのリスト
+    # @return 名前が一致したオブジェクトのリスト
     def getObjByName(self, name, cl):
         ans = []
         for c in cl:
@@ -1176,6 +1535,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 ans.append(c)
         return ans
 
+    ##
+    # @brief 指定した名前のRTCを取得
+    # @param self
+    # @param name 名前
+    # @return 名前が一致したRTCのリスト
     def searchComp(self, name):
         self.tree = rtctree.tree.RTCTree(servers='localhost', orb=self.comp._manager.getORB())
         compList = []
@@ -1184,6 +1548,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         return self.getObjByName(name,compList)
 
+    ##
+    # @brief 指定した名前のマネージャを取得
+    # @param self
+    # @param name 名前
+    # @return 名前が一致したマネージャのリスト
     def searchMgr(self, name):
         self.tree = rtctree.tree.RTCTree(servers='localhost', orb=self.comp._manager.getORB())
         compList = []
@@ -1192,6 +1561,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         return self.getObjByName(name,mgrList)
 
+    ##
+    # @brief 各RTCのコンフィギュレーション設定ファイルをrtc.confに指定
+    # @param self
+    # @param f rtc.confのファイルストリーム
+    # @param dir 各RTCのコンフィギュレーション設定ファイルの保存ディレクトリ
     def setRTCConfigFile(self, f, dir):
         rtc_list = getUseDll(dir, "*.*.conf")
         for r in rtc_list:
@@ -1200,7 +1574,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             path = os.path.relpath(r).replace("\\","/")
             cmd = name[0]+"."+name[1]+".config_file: " + path + "\n"
             f.write(cmd)
-    # boolean startRTCD()
+            
+    ##
+    # @brief C++のrtcdを起動
+    # @param self
+    # @return 各種設定ファイルをロードしていない場合はFalse
     def startRTCD_Cpp(self):
         if not self.rtcdCppFlag:
             return False
@@ -1261,6 +1639,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         # *** Implement me
         # Must return: result
 
+    ##
+    # @brief Pythonのrtcdを起動
+    # @param self
+    # @return 各種設定ファイルをロードしていない場合はFalse
     def startRTCD_Py(self):
         if not self.rtcdPyFlag:
             return False
@@ -1320,6 +1702,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         return True
 
+    ##
+    # @brief rtc.confの各種設定を保存
+    # @param self
+    # @param fd rtc.confのファイルストリーム
+    # @param confList 各種設定のリスト
+    # @param filepath ディレクトリパス
+    # @param rtcdFlag Falseの時は実行順序設定ファイルを新規作成
+    # @param compositeList 複合コンポーネントのリスト
     def saveData(self, fd, confList, filepath,  rtcdFlag=True,compositeList=[]):
         
         for d in confList:
@@ -1367,7 +1757,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             #print "manager.modules.loadRTCs: "+filename+"\n"
             fd.write("manager.modules.loadRTCs: "+filename+"\n")
 
-    # boolean exitRTCD()
+    ##
+    # @brief 未実装
+    # @param self
+    # @return True
     def exitRTCD_Cpp(self):
         
         return True
@@ -1375,13 +1768,26 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         # *** Implement me
         # Must return: result
 
+    ##
+    # @brief 未実装
+    # @param self
+    # @return True
     def exitRTCD_Py(self):
         
         return True
 
+    ##
+    # @brief 指定したパスの相対パスを出力
+    # @param self
+    # @param filepath 指定するパス
+    # @return 相対パス
     def getRelPath(self, filepath):
         return os.path.relpath(filepath).replace("\\","/")
 
+    ##
+    # @brief 複合コンポーネント、システム復元のスクリプトファイルを生成
+    # @param self
+    # @return True
     def setSystem(self):
         if os.name == 'posix':
             name = self.home_dirname+"/composite.sh"
@@ -1428,13 +1834,27 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         return True
 
+    ##
+    # @brief 外部のRTCのリストを入力
+    # @param self
+    # @param name RTCのリスト
+    # @return True
     def setExRTCList(self, name):
         self.exRTCList = name[:]
         #print self.exRTCList
         return True
+
+    ##
+    # @brief 外部のRTCのリストを取得
+    # @param self
+    # @return (True、RTCのリストを)
     def getExRTCList(self):
         return (True,self.exRTCList)
 
+    ##
+    # @brief 指定した相対パスのディレクトリを生成
+    # @param self
+    # @param path パス
     def createNonExistFolder(self, path):
         #filename = os.path.abspath(path)
         #dname = os.path.dirname(filename)
@@ -1451,7 +1871,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 
                 os.mkdir(epath)
         
-
+    ##
+    # @brief 指定ディレクトリをコピー
+    # @param self
+    # @param path コピー元のディレクトリパス
+    # @param filepath コピー先のディレクトリ
     def saveDir(self, path, filepath):
         
         path.replace("\\","/")
@@ -1485,7 +1909,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
 
 
-
+    ##
+    # @brief 特定のスクリプトファイルを実行するスクリプトファイルを生成
+    # @param self
+    # @param name スクリプトファイル名
+    # @param dname 保存先のディレクトリ
+    # @param homedir_fp ホームディレクトリ
     def createDirectDirScript(self, name, dname, homedir_fp):
         sname = os.path.join(dname,name)
             
@@ -1512,6 +1941,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         f.close()
 
+    ##
+    # @brief パッケージ作成
+    # @param self
+    # @param filepath 保存ファイル名(プロジェクトは同名のフォルダに保存)
+    # @return 成功でTrue、失敗でFalse
     def createProject(self, filepath):
         if not self.rtcdCppFlag:
             return False
@@ -1627,6 +2061,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         #self.confList_py = []
         return True
 
+    ##
+    # @brief 起動するRTCをパッケージのフォルダにコピーする
+    # @param self
+    # @param rtc_list RTCのリスト
+    # @param パッケージのフォルダ
     def copyRTComponentDir(self, rtc_list, dir):
         for c in rtc_list:
             if c.num != 0:
@@ -1635,6 +2074,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 if os.path.exists(path1):
                     shutil.copytree(path1, path2)
 
+    ##
+    # @brief 指定した名前のRTCのプロファイルを取得
+    # @param self
+    # @param name RTCの名前
+    # @return RTCプロファイル
     def getProfile(self, name):
         rp = RTComponentProfile()
 
@@ -1646,7 +2090,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             if str(count) not in lobj:
                 return str(count)
             count += 1"""
-        
+
+    ##
+    # @brief プロセスから起動しているRTCのリストを更新(プロセス終了の場合はリストから削除)
+    # @param self
     def updateCompList(self):
         for k,v in self.runRTCList.items():
             for c in v:
@@ -1654,6 +2101,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                     if c["process"].poll() != None:
                         v.remove(c)
 
+    ##
+    # @brief 指定した名前のフォルダから動的リンクライブラリを検索
+    # @param self
+    # @param name　フォルダ名
+    # @param filename 動的リンクライブラリ名
+    # @return　(動的リンクライブラリのパス、動的リンクライブラリの存在するディレクトリのパス)
     def getFilePath_dll(self, name, filename):
         rp = RTComponentProfile()
         #filename = name
@@ -1668,6 +2121,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             return path,dname
         return "",""
 
+    ##
+    # @brief 指定した名前のフォルダから実行ファイルを検索
+    # @param self
+    # @param name　フォルダ名
+    # @param filename 実行ファイル名
+    # @return　(実行ファイルのパス、実行ファイルの存在するディレクトリのパス、実行ファイル名)
     def getFilePath_exe(self, name, filename):
         rp = RTComponentProfile()
         filename = filename + "Comp"
@@ -1681,6 +2140,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             return path,dname,bname
         return "","",""
 
+    ##
+    # @brief 指定した名前のフォルダからPythonファイルを検索
+    # @param self
+    # @param name　フォルダ名
+    # @param filename Pythonファイル名
+    # @return　(Pythonファイルのパス、Pythonファイルの存在するディレクトリのパス、Pythonファイル名)
     def getFilePath_py(self, name, filename):
         rp = RTComponentProfile()
         #filename = name
@@ -1693,6 +2158,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             return path,dname,bname
         return "","",""
 
+    ##
+    # @brief RTCのリストからRTCを起動
+    # @param self
+    # @param name　RTC名
+    # @param runtype 0の場合はrtcdで起動、1の場合は別プロセスで起動
+    # @return　成功でTrue、失敗でFalse
     def createComp(self, name, runtype):
         self.updateCompList()
         rp = RTComponentProfile()
@@ -1803,6 +2274,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 
         return False
 
+    ##
+    # @brief 削除予定
+    # @param self
+    # @param name　RTC名
+    # @return　True
     def removeComp(self, name):
         """self.updateCompList()
         if name in self.runRTCList:
@@ -1833,12 +2309,22 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         """            
         return False
 
+    ##
+    # @brief RTCプロファイルのリストを取得
+    # @param self
+    # @return　(True、RTCプロファイルのリスト)
     def getProfileList(self):
         
         rp = RTComponentProfile()
         
         return rp.getProfileList()
 
+    ##
+    # @brief RTCのリストから起動したRTCの情報を保存
+    # @param self
+    # @param filename 保存ファイル名
+    # @param rtc_list RTCのリスト
+    # @param mode rtcdから起動するRTCは0、別プロセスで起動するRTCは1
     def saveRTCsData(self, filename, rtc_list, mode):
         
         f = open(filename, "wb")
@@ -1866,6 +2352,11 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         f.close()
 
+    ##
+    # @brief リストから選択して起動するRTCの情報を保存
+    # C++のrtcdから起動するRTCの情報のみ保存
+    # @param self
+    # @param path 保存ディレクトリパス
     def save_RTCs_rtcd_cpp(self, path):
         try:
             
@@ -1891,7 +2382,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             tbinfo = traceback.format_tb( info[2] )
             for tbi in tbinfo:
                 print tbi
-                
+
+    ##
+    # @brief リストから選択して起動するRTCの情報を保存
+    # Pythonのrtcdから起動するRTCの情報のみ保存
+    # @param self
+    # @param path 保存ディレクトリ
     def save_RTCs_rtcd_py(self, path):
         try:
             ans, rtc_list = self.comp._rtcControl_py._ptr().getCompList()
@@ -1916,14 +2412,21 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             tbinfo = traceback.format_tb( info[2] )
             for tbi in tbinfo:
                 print tbi
-                
+
+    ##
+    # @brief 全てのサブプロセスを終了させる
+    # @param self
     def finalizeProcess(self):
         self.clean_RTCs()
         if self.rtcdControlprocess:
             self.rtcdControlprocess.kill()
         if self.rtcdControlPyprocess:
             self.rtcdControlPyprocess.kill()
-            
+
+    ##
+    # @brief リストから起動するRTCを保存ファイルから読み込んで起動
+    # @param self
+    # @param path 保存ディレクトリ
     def open_RTCs(self, path):
         filename = os.path.join(path,"RTCs.conf")
         
@@ -1937,6 +2440,9 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                     self.createComp(name, 1)
             f.close()
 
+    ##
+    # @brief リストから起動するRTC(別プロセスで起動)を全て終了
+    # @param self
     def clean_RTCs(self):
         self.updateCompList()
         for k,v in self.runRTCList.items():
@@ -1946,7 +2452,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 else:
                     c["process"].kill()
         self.runRTCList = {}
-        
+
+    ##
+    # @brief リストのRTCを起動するスクリプトファイルを生成
+    # @param self
+    # @param path 保存ディレクトリ
+    # @param workspace ホームディレクトリ
     def save_RTCs(self, path, workspace):
         
         rtc_list = []
@@ -2053,7 +2564,7 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 	# 
 	def __init__(self, manager):
 		OpenRTM_aist.DataFlowComponentBase.__init__(self, manager)
-                self._manager = manager
+		self._manager = manager
 		"""
 		"""
 		self._rtcconfPort = OpenRTM_aist.CorbaPort("rtcconf")
@@ -2093,13 +2604,9 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 
 		 
 	##
-	#
-	# The initialize action (on CREATED->ALIVE transition)
-	# formaer rtc_init_entry() 
-	# 
+	# @brief 初期化処理用コールバック関数
+	# @param self 
 	# @return RTC::ReturnCode_t
-	# 
-	#
 	def onInitialize(self):
 		# Bind variables and configuration variable
 		
@@ -2121,15 +2628,11 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 		
 		return RTC.RTC_OK
 	
-	#	##
-	#	# 
-	#	# The finalize action (on ALIVE->END transition)
-	#	# formaer rtc_exiting_entry()
-	#	# 
-	#	# @return RTC::ReturnCode_t
-	#
-	#	# 
-	def onFinalize(self, ec_id):
+	##
+	# @brief 終了処理用コールバック関数
+	# @param self 
+	# @return RTC::ReturnCode_t
+	def onFinalize(self):
 		self._rtcconf.finalizeProcess()
 		return RTC.RTC_OK
 	
@@ -2161,92 +2664,77 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 	#
 	#	return RTC.RTC_OK
 	
-		##
-		#
-		# The activated action (Active state entry action)
-		# former rtc_active_entry()
-		#
-		# @param ec_id target ExecutionContext Id
-		# 
-		# @return RTC::ReturnCode_t
-		#
-		#
+	##
+	# @brief 活性化処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onActivated(self, ec_id):
-                try:
-                    pass
-                    #self._rtcconf.open_RTCs(".")
-                    #self._rtcconf.createComp("MySecondComponent",0)
-                    #self._rtcconf.createComp("MySecondComponent",0)
-                    #self._rtcconf.createComp("MySecondComponent",0)
-                    
-                except:
-                    info = sys.exc_info()
-                    tbinfo = traceback.format_tb( info[2] )
-                    for tbi in tbinfo:
-                        print tbi
-                #self._rtcconf.createComp("MySecondComponent",1)
-                #self._rtcconf.createComp("MySecondComponent",1)
-                
-                #print self._rtcControl_cpp._ptr().createComp("MyFirstComponent","..\\..\\..\\..\\Components\\MyFirstComponent\\src\\Release")
-                #print self._rtcControl_py._ptr().createComp("MySecondComponent","..\\Components\\MySecondComponent")
-                
+		try:
+				pass
+				#self._rtcconf.open_RTCs(".")
+				#self._rtcconf.createComp("MySecondComponent",0)
+				#self._rtcconf.createComp("MySecondComponent",0)
+				#self._rtcconf.createComp("MySecondComponent",0)
+		
+		except:
+				info = sys.exc_info()
+				tbinfo = traceback.format_tb( info[2] )
+				for tbi in tbinfo:
+						print tbi
+		#self._rtcconf.createComp("MySecondComponent",1)
+		#self._rtcconf.createComp("MySecondComponent",1)
+		
+		#print self._rtcControl_cpp._ptr().createComp("MyFirstComponent","..\\..\\..\\..\\Components\\MyFirstComponent\\src\\Release")
+		#print self._rtcControl_py._ptr().createComp("MySecondComponent","..\\Components\\MySecondComponent")
+		
 		return RTC.RTC_OK
 	
-		##
-		#
-		# The deactivated action (Active state exit action)
-		# former rtc_active_exit()
-		#
-		# @param ec_id target ExecutionContext Id
-		#
-		# @return RTC::ReturnCode_t
-		#
-		#
+	##
+	# @brief 不活性化処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onDeactivated(self, ec_id):
-                try:
-                    pass
-                    #print self._rtcControl_py._ptr().getCompList()
-                    #self._rtcconf.save_RTCs(None,".")
-                    #self._rtcconf.save_RTCs(".",".")
-                    #self._rtcconf.clean_RTCs()
-                    #f = open("test2.conf", "w")
-                    #self._rtcconf.save_RTCs_rtcd_py(f,".")
-                    #f.close()
-                except:
-                    info = sys.exc_info()
-                    tbinfo = traceback.format_tb( info[2] )
-                    for tbi in tbinfo:
-                        print tbi
-                #self._rtcconf.updateCompList()
-                #print  self._rtcconf.runRTCList
-                #self._rtcconf.removeComp("MySecondComponent","2")
-                #print self._rtcconf.runRTCList
-                #print self._rtcControl_py._ptr().getCompList()
-                #print self._rtcControl_cpp._ptr().removeComp("MyFirstComponent")
-                #print self._rtcControl_py._ptr().removeComp("MySecondComponent")
-                #print self._rtcControl_py._ptr().getCompList()
+		try:
+				pass
+				#print self._rtcControl_py._ptr().getCompList()
+				#self._rtcconf.save_RTCs(None,".")
+				#self._rtcconf.save_RTCs(".",".")
+				#self._rtcconf.clean_RTCs()
+				#f = open("test2.conf", "w")
+				#self._rtcconf.save_RTCs_rtcd_py(f,".")
+				#f.close()
+		except:
+				info = sys.exc_info()
+				tbinfo = traceback.format_tb( info[2] )
+				for tbi in tbinfo:
+						print tbi
+		#self._rtcconf.updateCompList()
+		#print  self._rtcconf.runRTCList
+		#self._rtcconf.removeComp("MySecondComponent","2")
+		#print self._rtcconf.runRTCList
+		#print self._rtcControl_py._ptr().getCompList()
+		#print self._rtcControl_cpp._ptr().removeComp("MyFirstComponent")
+		#print self._rtcControl_py._ptr().removeComp("MySecondComponent")
+		#print self._rtcControl_py._ptr().getCompList()
 		return RTC.RTC_OK
 	
-		##
-		#
-		# The execution action that is invoked periodically
-		# former rtc_active_do()
-		#
-		# @param ec_id target ExecutionContext Id
-		#
-		# @return RTC::ReturnCode_t
-		#
-		#
+	##
+	# @brief 周期処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onExecute(self, ec_id):
-                #print len(self._rtcControl_pyPort.get_connector_profiles())
-
-        
-        
-        
-        # *** Implement me
-        # Must return: result, data
-        #self._rtcconf.save("")
-        #print self._rtcControl_py._ptr().getRTC()
+		#print len(self._rtcControl_pyPort.get_connector_profiles())
+		
+		
+		
+		
+		# *** Implement me
+		# Must return: result, data
+		#self._rtcconf.save("")
+		#print self._rtcControl_py._ptr().getRTC()
 		return RTC.RTC_OK
 	
 	#	##
@@ -2322,24 +2810,31 @@ class rtcConfSet(OpenRTM_aist.DataFlowComponentBase):
 	
 
 
-
+##
+# @brief RTCをファクトリに追加
+# @param manager マネージャーオブジェクト
 def rtcConfSetInit(manager):
     profile = OpenRTM_aist.Properties(defaults_str=rtcconfset_spec)
     manager.registerFactory(profile,
                             rtcConfSet,
                             OpenRTM_aist.Delete)
 
+##
+# @brief RTC初期化
+# @param manager マネージャーオブジェクト
 def MyModuleInit(manager):
     rtcConfSetInit(manager)
 
     # Create a component
     comp = manager.createComponent("rtcConfSet")
 
+##
+# @brief メイン関数
 def main():
-    
-        if os.name == 'nt':
-            os.environ['PATH'] += ";"+os.path.abspath("..\\DLL")+";"
-        
+	
+	if os.name == 'nt':
+		os.environ['PATH'] += ";"+os.path.abspath("..\\DLL")+";"
+	
 	mgr = OpenRTM_aist.Manager.init(sys.argv)
 	mgr.setModuleInitProc(MyModuleInit)
 	mgr.activateManager()

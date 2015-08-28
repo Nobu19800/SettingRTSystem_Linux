@@ -36,13 +36,17 @@ import rtcControl, rtcControl__POA
 
 
 
-
+##
+# @class RTCDataInterface_i
+# @brief 起動するRTCの操作のインターフェース
+# 
+# 
 class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
-    """
-    @class RTCDataInterface_i
-    Example class implementing IDL interface rtcControl.RTCDataInterface
-    """
-
+    ##
+    # @brief コンストラクタ
+    # @param self
+    # @param comp rtcdControlPyコンポーネントオブジェクト
+    # 
     def __init__(self, comp):
         """
         @brief standard constructor
@@ -53,14 +57,25 @@ class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
         self.LoadRTCs = LoadRTCs.LoadRTCs(comp.manager)
         self.LoadRTCs.openFile()
 
-    # boolean getRTC(out rtcPathSeq paths)
+    ##
+    # @brief 起動中のRTCのリスト取得
+    # @param self
+    # @return (True,RTCのリスト)
+    # 
     def getRTC(self):
         return (True, self.comp.getNameList())
         raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
         # *** Implement me
         # Must return: result, paths
 
-    # boolean createComp(in string filename, in string filepath)
+    ##
+    # @brief RTCの起動
+    # @param self
+    # @param name RTC名
+    # @param filename　ファイル名
+    # @param filepath ディレクトリパス
+    # @return 成功でTrue、失敗でFalse
+    # 
     def createComp(self, name, filename, filepath):
         return self.LoadRTCs.createComp(name, filename, filepath)
     
@@ -70,7 +85,12 @@ class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
 
     
 
-    # boolean removeComp(in string name)
+    ##
+    # @brief RTCの終了
+    # @param self
+    # @param filename RTC名
+    # @return 成功でTrue、失敗でFalse
+    # 
     def removeComp(self, filename):
         return self.LoadRTCs.createComp(filename)
         
@@ -78,7 +98,11 @@ class RTCDataInterface_i (rtcControl__POA.RTCDataInterface):
         # *** Implement me
         # Must return: result
 
-    
+    ##
+    # @brief 起動中のRTCのリスト取得
+    # @param self
+    # @return RTCのリスト
+    # 
     def getCompList(self):
         return self.LoadRTCs.getCompList()
         
@@ -120,7 +144,7 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 	def __init__(self, manager):
 		OpenRTM_aist.DataFlowComponentBase.__init__(self, manager)
 
-                self.manager = manager
+		self.manager = manager
 		"""
 		"""
 		self._rtcControl_pyPort = OpenRTM_aist.CorbaPort("rtcControl_py")
@@ -128,7 +152,7 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 		"""
 		"""
 		self._rtcControl_py = RTCDataInterface_i(self)
-                
+		
 		#print self._rtcControl_py.createComp("MySecondComponent","..\\Components\\MySecondComponent")
 		
 
@@ -148,6 +172,10 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 	# @return RTC::ReturnCode_t
 	# 
 	#
+	##
+	# @brief 初期化処理用コールバック関数
+	# @param self 
+	# @return RTC::ReturnCode_t
 	def onInitialize(self):
 		# Bind variables and configuration variable
 		
@@ -173,7 +201,7 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 	#	# @return RTC::ReturnCode_t
 	#
 	#	# 
-	#def onFinalize(self, ec_id):
+	#def onFinalize(self):
 	#
 	#	return RTC.RTC_OK
 	
@@ -215,6 +243,11 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 		# @return RTC::ReturnCode_t
 		#
 		#
+	##
+	# @brief 活性化処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onActivated(self, ec_id):
                 """try:
                     self._rtcControl_py.createComp("MySecondComponent","..\\Components\\MySecondComponent")
@@ -238,6 +271,11 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 		# @return RTC::ReturnCode_t
 		#
 		#
+	##
+	# @brief 不活性化処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onDeactivated(self, ec_id):
             #for c in self._rtcControl_py.compList["MySecondComponent"]["compList"]:
             #    print c._exiting
@@ -260,17 +298,26 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 		# @return RTC::ReturnCode_t
 		#
 		#
+	##
+	# @brief 起動中のRTCのリスト
+	# @param self 
+	# @return RTCのリスト
 	def getNameList(self):
-            ans = []
-            objs = self.manager.getComponents()
-            for o in objs:
-                props = o.getProperties()
-                ans.append(props.findNode("naming").getProperty("names"))
-            return ans
-            
+		ans = []
+		objs = self.manager.getComponents()
+		for o in objs:
+				props = o.getProperties()
+				ans.append(props.findNode("naming").getProperty("names"))
+		return ans
+
+	##
+	# @brief 周期処理用コールバック関数
+	# @param self 
+	# @param ec_id target ExecutionContext Id
+	# @return RTC::ReturnCode_t
 	def onExecute(self, ec_id):
-                                
-                #print self.getNameList()
+		
+		#print self.getNameList()
 		return RTC.RTC_OK
 	
 	#	##
@@ -346,7 +393,9 @@ class rtcdControlPy(OpenRTM_aist.DataFlowComponentBase):
 	
 
 
-
+##
+# @brief RTCをファクトリに追加
+# @param manager マネージャーオブジェクト
 def rtcdControlPyInit(manager):
     profile = OpenRTM_aist.Properties(defaults_str=rtcdcontrolpy_spec)
     manager.registerFactory(profile,
@@ -355,6 +404,9 @@ def rtcdControlPyInit(manager):
     # Create a component
     comp = manager.createComponent("rtcdControlPy")
 
+##
+# @brief RTC初期化
+# @param manager マネージャーオブジェクト
 def MyModuleInit(manager):
     rtcdControlPyInit(manager)
 

@@ -1,4 +1,4 @@
-set(comp_srcs rtcdControl.cpp rtcControlSVC_impl.cpp LoadRTCs.cpp CompSearch.cpp )
+set(comp_srcs rtcdControl.cpp rtcControlSVC_impl.cpp LoadRTCs.cpp FileStreamFunc.cpp )
 set(standalone_srcs rtcdControlComp.cpp)
 
 if (DEFINED OPENRTM_INCLUDE_DIRS)
