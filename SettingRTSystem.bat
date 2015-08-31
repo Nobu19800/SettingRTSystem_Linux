@@ -1,4 +1,4 @@
 cd /d %~dp0
 python startNamingService.py
-start rumManager.bat
+start runManager.bat
 DLL\SettingRTSystem
