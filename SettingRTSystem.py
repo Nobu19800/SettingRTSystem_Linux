@@ -3,7 +3,7 @@
 
 ##
 #   @file SettingRTCConf.py
-#   @brief 
+#   @brief 複合コンポーネント作成支援ツール
 
 
 
@@ -41,7 +41,7 @@ import SettingRTSystem_rc
 
         
 ##
-# @brief 
+# @brief メイン関数
 def main():
     #mgrc = ManagerControl("")
     app = QtGui.QApplication([""])
@@ -52,15 +52,15 @@ def main():
     app.processEvents()
     
     if os.name == 'posix':
-        process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf".split(" "))
+        #process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf".split(" "))
         process_confset = subprocess.Popen("sh rtcConfSet.sh".split(" "))
         #process_confset = os.system("sh rtcConfSet.sh&")
     elif os.name == 'nt':
-        process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf")
+        #process_rtcd = subprocess.Popen("python Manager/Python/rtcd.py -f Manager/Python/rtc.conf")
         #process_rtcd = os.system("start python Manager/Python/rtcd.py -f Manager/Python/rtc.conf")
         process_confset = subprocess.Popen("rtcConfSet.bat")
         #process_confset = os.system("start rtcConfSet.bat")
-
+    
     
 
     

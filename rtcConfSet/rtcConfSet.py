@@ -1167,7 +1167,12 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         if not os.path.exists(fname):
             f = open(fname, 'w')
             self.writeFileOption(f)
-            if os.name == 'nt':
+            if os.name == 'posix':
+                cmd = "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + os.path.relpath("../DLL",home_dirname).replace("\\","/")+ "\n"
+                f.write(cmd)
+                cmd = "cdir=$(cd $(dirname $0);pwd)" + "\n"
+                f.write(cmd)
+            elif os.name == 'nt':
                 cmd = "set PATH=%PATH%;" + os.path.relpath("..\\DLL",home_dirname).replace("/","\\")+ ";\n"
                 f.write(cmd)
             shutil.copy2("../startNamingService.py", os.path.join(home_dirname,"startNamingService.py"))
@@ -1227,7 +1232,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             
 
             if os.name == 'posix':
-                cmd = "cd `dirname $0`" + "\n"
+                #cmd = "cd `dirname $0`" + "\n"
+                cmd = "cd ${cdir}" + "\n"
             elif os.name == 'nt':
                 cmd = "cd /d %~dp0" + "\n"
                     
