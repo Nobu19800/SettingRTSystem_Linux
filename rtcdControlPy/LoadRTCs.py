@@ -84,11 +84,13 @@ class LoadRTCs:
                 m = struct.unpack("i",f.read(4))[0]
                 for i in range(0,m):
                     name = ReadString(f).replace("\0","")
+                    filename = ReadString(f).replace("\0","")
                     d = struct.unpack("i",f.read(4))[0]
                     path = ReadString(f).replace("\0","")
                     dir = ReadString(f).replace("\0","")
+                    
                     for j in range(0,d):
-                        self.createComp(name,dir)
+                        self.createComp(name,filename,dir)
                 f.close()
 
     ##
@@ -108,17 +110,18 @@ class LoadRTCs:
     ##
     # @brief RTCを起動
     # @param self
-    # @param filename RTC名
+    # @param name RTC名
+    # @param filename ファイル名
     # @param filepath ファイルパス
     # @return 成功でTrue、失敗でFalse
-    def createComp(self, filename, filepath):
+    def createComp(self, name, filename, filepath):
         self.updateCompList()
         filepath = os.path.relpath(filepath)
         
         preLoadComp = None
-        if self.compList.has_key(filename):
-            func = self.compList[filename]["func"]
-            preLoadComp = self.compList[filename]
+        if self.compList.has_key(name):
+            func = self.compList[name]["func"]
+            preLoadComp = self.compList[name]
             
         
                 
@@ -143,10 +146,10 @@ class LoadRTCs:
                 preLoadComp["compList"].append({"component":comp,"callback_func":callback_func})
             else:
                 
-                self.compList[filename] = {"filename":filename,"filepath":filepath,"func":func,"compList":[]}
+                self.compList[name] = {"filename":filename,"filepath":filepath,"func":func,"compList":[]}
 
-                callback_func = RTC_FinalizeListener(comp,self.compList[filename])
-                self.compList[filename]["compList"].append({"component":comp,"callback_func":callback_func})
+                callback_func = RTC_FinalizeListener(comp,self.compList[name])
+                self.compList[name]["compList"].append({"component":comp,"callback_func":callback_func})
 
             
             #comp.addPostComponentActionListener(OpenRTM_aist.PostComponentActionListenerType.POST_ON_FINALIZE, callback_func.callback)
@@ -159,14 +162,14 @@ class LoadRTCs:
     ##
     # @brief RTCを終了
     # @param self
-    # @param filename RTC名
+    # @param name RTC名
     # @return 成功でTrue、失敗でFalse    
-    def removeComp(self, filename):
+    def removeComp(self, name):
         self.updateCompList()
-        if self.compList.has_key(filename):
-            if len(self.compList[filename]["compList"]) != 0:
-                self.compList[filename]["compList"][-1]["component"].exit()
-                del self.compList[filename]["compList"][-1]
+        if self.compList.has_key(name):
+            if len(self.compList[name]["compList"]) != 0:
+                self.compList[name]["compList"][-1]["component"].exit()
+                del self.compList[name]["compList"][-1]
             else:
                 return False
         else:
@@ -200,7 +203,7 @@ class LoadRTCs:
             
             if len(c["compList"]) != 0:
                 
-                data = rtcControl.RTC_Data(c["filename"],len(c["compList"]))
+                data = rtcControl.RTC_Data(i,c["filename"],len(c["compList"]))
                 
                 names.append(data)
             
