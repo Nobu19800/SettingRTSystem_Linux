@@ -827,6 +827,8 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     # @return 言語
     #                      
     def judgeLanguage(self, comp):
+        #C++版のOpenRTM-aistの非アクティブ化に不具合があるためPython版のrtcdで複合コンポーネントを起動するようにして対応
+        return "Python"
         for k,v in comp.members.items():
             for c in v:
                 props = c.get_component_profile().properties
@@ -1170,7 +1172,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             if os.name == 'posix':
                 cmd = "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + os.path.relpath("../DLL",home_dirname).replace("\\","/")+ "\n"
                 f.write(cmd)
-                cmd = "cdir=$(cd $(dirname $0);pwd)" + "\n"
+                cmd = "cdir=${PWD}" + "\n"
                 f.write(cmd)
             elif os.name == 'nt':
                 cmd = "set PATH=%PATH%;" + os.path.relpath("..\\DLL",home_dirname).replace("/","\\")+ ";\n"
@@ -1183,6 +1185,30 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 
             f.write(cmd)
 
+            path = os.path.relpath("../workspace",home_dirname)
+            if os.name == 'posix':
+                path = path.replace("\\","/")
+                cmd = "workspaceDir=" + path + "\n"
+                f.write(cmd)
+                cmd = "if [ ! -e $workspaceDir ]; then" + "\n"
+                f.write(cmd)
+                cmd = "\t" + "mkdir $workspaceDir" + "\n"
+                f.write(cmd)
+                cmd = "fi" + "\n"
+                f.write(cmd)
+                
+                
+            elif os.name == 'nt':
+                path = path.replace("/","\\")
+                cmd = "set workspaceDir=" + path + "\n"
+                f.write(cmd)
+                cmd = "IF NOT EXIST %workspaceDir% (" + "\n"
+                f.write(cmd)
+                cmd = "\t" + "mkdir %workspaceDir%" + "\n"
+                f.write(cmd)
+                cmd = ")" + "\n"
+                f.write(cmd)
+
             if os.name == 'posix':
                 f.write("sh rtcStart_exe.sh\n")
             elif os.name == 'nt':
@@ -1190,15 +1216,16 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 
             
             
-            path = os.path.relpath("../workspace",home_dirname)
-            if os.name == 'posix':
-                path = path.replace("\\","/")
-            elif os.name == 'nt':
-                path = path.replace("/","\\")
+            
                 
-               
-            cmd = "cd " + path + "\n"
-            f.write(cmd)
+                
+
+            if os.name == 'posix':
+                cmd = "cd $workspaceDir" + "\n"
+                f.write(cmd)
+            elif os.name == 'nt':
+                cmd = "cd %workspaceDir% " + "\n"
+                f.write(cmd)
 
             
             if os.name == 'posix':
