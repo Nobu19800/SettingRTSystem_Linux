@@ -1177,7 +1177,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             elif os.name == 'nt':
                 cmd = "set PATH=%PATH%;" + os.path.relpath("..\\DLL",home_dirname).replace("/","\\")+ ";\n"
                 f.write(cmd)
-            shutil.copy2("../startNamingService.py", os.path.join(home_dirname,"startNamingService.py"))
+            try:
+                shutil.copy2("../startNamingService.py", os.path.join(home_dirname,"startNamingService.py"))
+            except:
+                pass
             if os.name == 'posix':
                 cmd = "python startNamingService.py\n"
             elif os.name == 'nt':
@@ -1937,8 +1940,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         
         if os.path.exists(fn):
-            shutil.rmtree(fn)
-        shutil.copytree(path, fn)
+            try:
+                shutil.rmtree(fn)
+            except:
+                pass
+        try:
+            shutil.copytree(path, fn)
+        except:
+            pass
         
 
 
@@ -2025,13 +2034,25 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         self.createNonExistFolder(os.path.join(fn,"../"))
 
         if os.path.exists(fn):
-            shutil.rmtree(fn)
-        shutil.copytree(self.home_dirname, fn)
+            try:
+                shutil.rmtree(fn)
+            except:
+                pass
+        try:
+            shutil.copytree(self.home_dirname, fn)
+        except:
+            pass
 
         manager_fn = os.path.join(dname,"Manager")
         if os.path.exists(manager_fn):
-            shutil.rmtree(manager_fn)
-        shutil.copytree("../Manager", manager_fn)
+            try:
+                shutil.rmtree(manager_fn)
+            except:
+                pass
+        try:
+            shutil.copytree("../Manager", manager_fn)
+        except:
+            pass
 
         wp = os.path.join(dname,"workspace")
         if not os.path.exists(wp):
@@ -2085,6 +2106,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         self.createDirectDirScript("active", dname, homedir_fp)
         self.createDirectDirScript("deactive", dname, homedir_fp)
         self.createDirectDirScript("exit", dname, homedir_fp)
+
+        path1 = "../ExecutionContext"
+        path2 = os.path.join(dname,"ExecutionContext")
+        if os.path.exists(path1):
+            try:
+                shutil.copytree(path1, path2)
+            except:
+                pass
         """homedir_fp
         f = open(os.path.join(dname,fname), 'w')
         """
@@ -2105,7 +2134,10 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
                 path1 = os.path.join("../Components",c.name)
                 path2 = os.path.join(dir,c.name)
                 if os.path.exists(path1):
-                    shutil.copytree(path1, path2)
+                    try:
+                        shutil.copytree(path1, path2)
+                    except:
+                        pass
 
     ##
     # @brief 指定した名前のRTCのプロファイルを取得
