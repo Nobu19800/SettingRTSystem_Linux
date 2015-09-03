@@ -412,8 +412,9 @@ class RTComponentProfile():
     # @param filename ファイル名
     # @return ファイルパス
     # 
-    def getFile(self, dirname, filename):
-        filename = searchFile(filename,os.path.join(self.compPath,dirname))
+    def getFile(self, dirname, filename, compPath="../Components"):
+        
+        filename = searchFile(filename,os.path.join(compPath,dirname))
         return filename
 
     ##
@@ -422,8 +423,8 @@ class RTComponentProfile():
     # @param name 検索するフォルダ
     # @return RTCプロファイル
     # 
-    def getProfile(self, name):
-        filename = searchFile("RTC.xml",os.path.join(self.compPath,name))
+    def getProfile(self, name, compPath="../Components"):
+        filename = searchFile("RTC.xml",os.path.join(compPath,name))
         ans = True
         if filename != "":
             rp = RTCProfile(filename)
@@ -827,8 +828,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     # @return 言語
     #                      
     def judgeLanguage(self, comp):
-        #C++版のOpenRTM-aistの非アクティブ化に不具合があるためPython版のrtcdで複合コンポーネントを起動するようにして対応
-        return "Python"
+        
         for k,v in comp.members.items():
             for c in v:
                 props = c.get_component_profile().properties
@@ -891,7 +891,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         
         f = open(dirname[2]+"/rtc.conf", 'w')
         self.save_RTCs_rtcd_cpp(dirname[2])
-        self.saveData(f, self.confList_cpp, dirname[2], False, compositeRTCList["C++"])
+        self.saveData(f, self.confList_cpp, dirname[2], False, compositeRTCList["C++"],"C++")
         
 
         components = []
@@ -927,7 +927,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         f = open(dirname[3]+"/rtc.conf", 'w')
         self.save_RTCs_rtcd_py(dirname[3])
-        self.saveData(f, self.confList_py, dirname[3], False, compositeRTCList["Python"])
+        self.saveData(f, self.confList_py, dirname[3], False, compositeRTCList["Python"],"Python")
 
         py_path = None
 
@@ -1626,7 +1626,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
             self.rtcdControlprocess = None
         
         f = open(self.cppDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_cpp, self.cppDirName, True)
+        self.saveData(f, self.confList_cpp, self.cppDirName, True, [], "C++")
         cmd = "TEST.rtcdControl0.config_file: ../rtcdControl/rtcdcontrol.conf\n"
         f.write(cmd)
         self.setRTCConfigFile(f, self.cppDirName)
@@ -1691,7 +1691,7 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
         #self.rtcdPyFlag = True
         #print self.pyDirName+"/rtc.conf"
         f = open(self.pyDirName+"/rtc.conf", 'w')
-        self.saveData(f, self.confList_py, self.pyDirName, True)
+        self.saveData(f, self.confList_py, self.pyDirName, True, [], "Python")
         cmd = "TEST.rtcdControlPy0.config_file: ../rtcdControlPy/rtcdControlPy.conf\n"
         f.write(cmd)
         self.setRTCConfigFile(f, self.pyDirName)
@@ -1746,24 +1746,49 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
     # @param filepath ディレクトリパス
     # @param rtcdFlag Falseの時は実行順序設定ファイルを新規作成
     # @param compositeList 複合コンポーネントのリスト
-    def saveData(self, fd, confList, filepath,  rtcdFlag=True,compositeList=[]):
+    def saveData(self, fd, confList, filepath,  rtcdFlag=True,compositeList=[],language="Python"):
+        filename = ""
+        if language == "C++":
+            if os.name == 'posix':
+                filename = searchFile("ECandStateSharedComposite.so",os.path.join("../Composite","ECandStateSharedComposite"))
+            elif os.name == 'nt':
+                filename = searchFile("ECandStateSharedComposite.dll",os.path.join("../Composite","ECandStateSharedComposite"))
+        else:
+            filename = searchFile("ECandStateSharedComposite.py",os.path.join("../Composite","ECandStateSharedCompositePy"))
+        filename = os.path.relpath(filename)
+        dname = os.path.dirname(filename)
+        fname = os.path.basename(filename)
+        name, ext = os.path.splitext(fname)
+        pname = os.path.basename(dname)
+        filename = filename.replace("\\","/")
+        dname = dname.replace("\\","/")
         
+
         for d in confList:
             s = d.id + ": "
-
             
             
             if d.id == "manager.components.precreate":
                 print d.data
                 for c in range(0,len(compositeList)):
-                    s += "PeriodicECSharedComposite?&instance_name="+compositeList[c].name.split(".")[0]
+                    s += "ECandStateSharedComposite?&instance_name="+compositeList[c].name.split(".")[0]
                     #print c.name.split(".")
                     if c != len(compositeList)-1:
                         s += ","
 
                 if d.data != "":
                      s += ","
-                        
+            elif d.id == "manager.modules.load_path":
+                s += dname
+
+                if d.data != "":
+                     s += ","
+                     
+            elif d.id == "manager.modules.preload":
+                s += fname
+                if d.data != "":
+                     s += ","
+            
             #if rtcdFlag and d.id == "exec_cxt.periodic.type":
             #    s += "PeriodicExecutionContext"
             
@@ -2109,6 +2134,14 @@ class ConfDataInterface_i (RTCConfData__POA.ConfDataInterface):
 
         path1 = "../ExecutionContext"
         path2 = os.path.join(dname,"ExecutionContext")
+        if os.path.exists(path1):
+            try:
+                shutil.copytree(path1, path2)
+            except:
+                pass
+
+        path1 = "../Composite"
+        path2 = os.path.join(dname,"Composite")
         if os.path.exists(path1):
             try:
                 shutil.copytree(path1, path2)
