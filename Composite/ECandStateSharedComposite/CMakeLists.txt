@@ -63,7 +63,7 @@ endif(${OpenRTM_FOUND})
 # Subdirectories
 add_subdirectory(cmake)
 if(BUILD_DOCUMENTATION)
-    add_subdirectory(doc)
+    #add_subdirectory(doc)
 endif(BUILD_DOCUMENTATION)
 
 #if(BUILD_EXAMPLES)
